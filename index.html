@@ -127,6 +127,29 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .sheet{position:fixed;inset:0;z-index:15;background:rgba(10,14,11,.5);display:flex;align-items:flex-end;justify-content:center}
 .sheet .form{width:100%;max-width:560px;border-radius:14px 14px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));max-height:92%;overflow:auto}
+#sheet{z-index:17}
+[data-cs]{cursor:pointer;text-decoration:underline dotted;text-decoration-thickness:1px;text-underline-offset:3px}
+.netcs[data-cs]{text-decoration:none}
+.tl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.tl-cs{font-family:var(--mono);font-weight:600;font-size:22px;margin:0}
+.state{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:2px 9px;margin-top:4px}
+.state.E{background:var(--in-soft);color:var(--in)} .state.F{background:var(--fire);color:#fff} .state.S{background:var(--out-soft);color:var(--out)}
+.tl-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tl-sum div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.tl-sum b{display:block;font-family:var(--mono);font-size:16px;font-variant-numeric:tabular-nums}
+.tl-sum span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tl-day{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin:4px 0 6px}
+.tl-list{position:relative;padding-left:24px;display:flex;flex-direction:column}
+.tl-list::before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.ev{position:relative;padding:2px 0 14px;cursor:pointer}
+.ev::before{content:"";position:absolute;left:-22px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px var(--surface)}
+.ev.E{--c:var(--in)} .ev.F{--c:var(--fire)} .ev.S{--c:var(--out)}
+.ev .gap{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:2px}
+.ev .l1{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.ev .hh{font-family:var(--mono);font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
+.ev .nums{font-size:14px;color:var(--muted)}
+.ev.now{cursor:default;padding-bottom:0}
+.ev.now::before{background:var(--surface);box-shadow:0 0 0 2px var(--c) inset,0 0 0 3px var(--surface)}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 </style>
 </head>
@@ -205,6 +228,16 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);
     </div>
   </section>
 </main>
+
+<div class="sheet" id="tl-sheet" hidden>
+  <div class="form" role="dialog" aria-label="Línea de tiempo">
+    <div class="tl-head"><div><p class="tl-cs" id="tl-cs"></p><span class="state" id="tl-state"></span></div><button class="btn small" type="button" id="tl-close">Cerrar</button></div>
+    <div class="tl-sum" id="tl-sum"></div>
+    <div id="tl-body"></div>
+    <p class="note">Toca un registro para editarlo.</p>
+    <div class="actions"><button class="btn primary" type="button" id="tl-new">Nuevo registro de este indicativo</button></div>
+  </div>
+</div>
 
 <div class="sheet" id="sheet" hidden>
   <form class="form" id="fe" autocomplete="off">
@@ -287,7 +320,7 @@ function inNet(){const last={};[...S.recs].sort((a,b)=>a.t<b.t?-1:1).forEach(r=>
 function nums(r){const p=[];if(r.veh!=null)p.push(r.veh+' veh');if(r.pax!=null)p.push(r.pax+' pax');if(r.zona)p.push(esc(r.zona));return p.join(' · ')}
 function row(r){return `<div class="item" data-id="${r.id}">
   <span class="badge ${r.tipo}">${TL[r.tipo]||r.tipo}</span>
-  <div class="top"><span class="cs">${esc(r.cs)}</span><span class="t">${hm(r.t)} · ${dtg(r.t)}</span></div>
+  <div class="top"><span class="cs" data-cs="${esc(r.cs)}" role="button" tabindex="0">${esc(r.cs)}</span><span class="t">${hm(r.t)} · ${dtg(r.t)}</span></div>
   ${nums(r)?`<div class="nums">${nums(r)}</div>`:''}
   ${r.acc?`<div class="acc">${esc(r.acc)}</div>`:''}
   <button class="btn small ed" type="button">Editar</button>
@@ -298,7 +331,7 @@ function render(){
   const tv=n.reduce((s,r)=>s+(r.veh||0),0),tp=n.reduce((s,r)=>s+(r.pax||0),0);
   $('#net').innerHTML=`<span class="h2">En malla ahora</span>
     <div class="nettot"><span><b>${n.length}</b> indicativos</span><span><b>${tv}</b> veh</span><span><b>${tp}</b> pax</span></div>
-    ${n.length?`<div class="netlist">${n.map(r=>`<span class="netcs ${r.tipo}">${esc(r.cs)}${r.tipo==='F'?' · LFX':''}</span>`).join('')}</div>`:'<p class="note">Nadie ha entrado todavía.</p>'}`;
+    ${n.length?`<div class="netlist">${n.map(r=>`<span class="netcs ${r.tipo}" data-cs="${esc(r.cs)}" role="button" tabindex="0">${esc(r.cs)}${r.tipo==='F'?' · LFX':''}</span>`).join('')}</div>`:'<p class="note">Nadie ha entrado todavía.</p>'}`;
 
   const q=$('#q').value.trim().toLowerCase();
   const recs=[...S.recs].sort((a,b)=>a.t<b.t?1:-1).filter(r=>!q||[r.cs,r.zona,r.acc,TL[r.tipo]].join(' ').toLowerCase().includes(q));
@@ -355,12 +388,14 @@ $('#q').addEventListener('input',render);
 
 /* edición */
 $('#list').addEventListener('click',e=>{
-  const b=e.target.closest('.ed');if(!b)return;const r=S.recs.find(x=>x.id===b.closest('.item').dataset.id);if(!r)return;
+  const b=e.target.closest('.ed');if(!b)return;const r=S.recs.find(x=>x.id===b.closest('.item').dataset.id);if(r)openEdit(r);
+});
+function openEdit(r){
   editId=r.id;($('#et-'+(r.tipo||'e').toLowerCase())||$('#et-e')).checked=true;$('#e-cs').value=r.cs;$('#e-t').value=toLocal(new Date(r.t));
   $('#e-veh').value=r.veh??'';$('#e-pax').value=r.pax??'';$('#e-zona').value=r.zona||'';$('#e-acc').value=r.acc||'';
   $('#sheet').hidden=false;
-});
-function closeEdit(){$('#sheet').hidden=true;editId=null}
+}
+function closeEdit(){$('#sheet').hidden=true;editId=null;if(tlCs)openTimeline(tlCs)}
 $('#e-cancel').addEventListener('click',closeEdit);
 $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')closeEdit()});
 $('#fe').addEventListener('submit',e=>{
@@ -405,6 +440,39 @@ $('#bk-dl').addEventListener('click',()=>{const ta=bkText();download(ta.dataset.
 $('#bk-rest').addEventListener('click',e=>{const d=parse($('#bk-text').value.trim(),null);if(!valid(d)){toast('Eso no es una copia válida');return}confirmTap(e.currentTarget,'Confirmar',()=>{restore(d);$('#bk-text').value=''})});
 $('#bk-file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{if(!valid(parse(r.result,null))){toast('El archivo no es una copia válida');return}$('#bk-text').value=r.result;toast('Cargado. Pulsa Restaurar')};r.readAsText(f);e.target.value=''});
 $('#wipe').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar: borrar todo',()=>{snapshot('wipe');S=blank();save('Todo borrado. Hay copia en la lista')}));
+
+/* línea de tiempo */
+let tlCs=null;
+const STATE={E:'En malla',F:'En LFX',S:'Fuera de malla'};
+function dur(ms){const m=Math.max(0,Math.round(ms/60000));if(m<60)return m+' min';return Math.floor(m/60)+'h '+p2(m%60)+'m'}
+function openTimeline(cs){
+  const rs=S.recs.filter(r=>r.cs===cs).sort((a,b)=>a.t<b.t?-1:1);
+  if(!rs.length){closeTimeline();return}
+  tlCs=cs;const now=Date.now(),last=rs[rs.length-1];
+  let inNetMs=0,lfxMs=0;
+  rs.forEach((r,i)=>{const end=i<rs.length-1?new Date(rs[i+1].t).getTime():now;const d=Math.max(0,end-new Date(r.t));if(r.tipo!=='S')inNetMs+=d;if(r.tipo==='F')lfxMs+=d});
+  $('#tl-cs').textContent=cs;
+  const st=$('#tl-state');st.className='state '+last.tipo;st.textContent=STATE[last.tipo]+' desde '+hm(last.t);
+  $('#tl-sum').innerHTML=`<div><b>${rs.length}</b><span>Registros</span></div><div><b>${dur(inNetMs)}</b><span>En malla</span></div><div><b>${dur(lfxMs)}</b><span>En LFX</span></div>`;
+  let html='',day='',prev=null;
+  rs.forEach(r=>{
+    const d=dayLabel(r.t);
+    if(d!==day){if(day)html+='</div>';day=d;html+=`<p class="tl-day">${d}</p><div class="tl-list">`;prev=prev}
+    const gap=prev?`<div class="gap">+${dur(new Date(r.t)-new Date(prev.t))}</div>`:'';
+    html+=`<div class="ev ${r.tipo}" data-id="${r.id}" role="button" tabindex="0">${gap}<div class="l1"><span class="hh">${hm(r.t)}</span><span class="badge ${r.tipo}">${TL[r.tipo]}</span></div>${nums(r)?`<div class="nums">${nums(r)}</div>`:''}${r.acc?`<div>${esc(r.acc)}</div>`:''}</div>`;
+    prev=r;
+  });
+  if(last.tipo!=='S')html+=`<div class="ev now ${last.tipo}"><div class="gap">+${dur(now-new Date(last.t))}</div><div class="l1"><span class="hh">Ahora</span><span class="nums">${STATE[last.tipo].toLowerCase()}</span></div></div>`;
+  html+='</div>';
+  $('#tl-body').innerHTML=html;
+  $('#tl-sheet').hidden=false;
+}
+function closeTimeline(){$('#tl-sheet').hidden=true;tlCs=null}
+document.addEventListener('click',e=>{const c=e.target.closest('[data-cs]');if(c&&!c.closest('.example'))openTimeline(c.dataset.cs)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){const c=e.target.closest&&e.target.closest('[data-cs],.ev[data-id]');if(c)c.click()}});
+$('#tl-close').addEventListener('click',closeTimeline);
+$('#tl-sheet').addEventListener('click',e=>{if(e.target.id==='tl-sheet')closeTimeline();const ev=e.target.closest('.ev[data-id]');if(ev){const r=S.recs.find(x=>x.id===ev.dataset.id);if(r)openEdit(r)}});
+$('#tl-new').addEventListener('click',()=>{const cs=tlCs,last=S.recs.filter(r=>r.cs===cs).sort((a,b)=>a.t<b.t?1:-1)[0];closeTimeline();setTab('reg');resetForm();$('#cs').value=cs;if(last){if(last.veh!=null)$('#veh').value=last.veh;if(last.pax!=null)$('#pax').value=last.pax;if(last.zona)$('#zona').value=last.zona}$(last&&last.tipo!=='S'?'#t-s':'#t-e').checked=true;saveDraft();window.scrollTo({top:0,behavior:'smooth'});toast('Formulario listo para '+cs)});
 
 /* reloj y arranque */
 function tick(){const n=new Date().toISOString();$('#clock').textContent=dtg(n)+' · '+hm(n)}
