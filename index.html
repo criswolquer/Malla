@@ -50,7 +50,7 @@ img{max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
 button,input,textarea,select{font:inherit;color:inherit}
 
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px 0}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:1000;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px 0}
 .hrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;max-width:760px;margin:0 auto}
 h1{font-size:20px;font-weight:700;margin:0}
 .clock{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -66,7 +66,8 @@ section.panel{display:flex;flex-direction:column;gap:18px}
 .h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:600}
 .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .row.cs-t{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}
-input[type=datetime-local]{max-width:100%;font-size:16px}
+input[type=datetime-local]{max-width:100%;font-size:16px;-webkit-appearance:none;appearance:none;min-height:46px;display:block}
+input[type=datetime-local]::-webkit-date-and-time-value{text-align:left}
 label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
 input[type=text],input[type=search],input[type=datetime-local],input[type=number],textarea,select{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:10px 11px;font-size:17px;width:100%;min-width:0;color:var(--ink);font-weight:400}
 input[type=number]{font-family:var(--mono)}
@@ -117,13 +118,14 @@ a.btn{text-decoration:none;color:var(--ink);display:inline-block;text-align:cent
 .item:first-child{border-top:0}
 .card{cursor:pointer}
 .card:active{background:var(--surface2)}
-.badge{grid-row:1/span 4;min-width:62px;text-align:center;font-family:var(--mono);font-size:12px;font-weight:600;border-radius:5px;padding:3px 6px;margin-top:3px;letter-spacing:.04em}
+.badge{grid-row:1/span 12;min-width:62px;text-align:center;font-family:var(--mono);font-size:12px;font-weight:600;border-radius:5px;padding:3px 6px;margin-top:3px;letter-spacing:.04em}
 .item .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .item .cs{font-family:var(--mono);font-weight:600;font-size:18px}
 .item .t{font-family:var(--mono);font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
 .item .nums{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
 .item .acc{overflow-wrap:anywhere}
-.item .side{grid-column:3;grid-row:1/span 4;align-self:center}
+.item .side{grid-column:3;grid-row:1/span 12;align-self:center}
+.item>:not(.badge):not(.side){grid-column:2}
 .item.example{opacity:.5;cursor:default}
 .out .cs{color:var(--muted)}
 .tag{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--muted)}
@@ -139,11 +141,12 @@ details.fold[open] summary{margin-bottom:8px}
 .strow .kw{grid-column:1/-1}
 .strow .prev{font-family:var(--mono);font-size:12px;font-weight:600;border-radius:5px;padding:3px 8px;justify-self:start}
 
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:20;max-width:calc(100% - 32px)}
+.toast{z-index:2000!important;position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:20;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
-.sheet{position:fixed;inset:0;z-index:15;background:rgba(10,14,11,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet{position:fixed;inset:0;z-index:1500;background:rgba(10,14,11,.5);display:flex;align-items:flex-end;justify-content:center}
 .sheet .form{width:100%;max-width:560px;border-radius:14px 14px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));max-height:92%;overflow:auto}
-#sheet{z-index:17}
+#sheet{z-index:1700}
+#pt-sheet{z-index:1600}
 
 /* línea de tiempo */
 .tl-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
@@ -173,7 +176,7 @@ details.fold[open] summary{margin-bottom:8px}
 #plot svg{display:block;width:100%;height:100%}
 .maptools{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .maptools label{flex-direction:row;align-items:center;gap:6px;font-size:14px;color:var(--ink)}
-#rmap{height:62vh;min-height:320px;border-radius:10px;border:1px solid var(--line);overflow:hidden;position:relative;background:var(--surface)}
+#rmap{height:62vh;min-height:320px;border-radius:10px;border:1px solid var(--line);overflow:hidden;position:relative;z-index:0;isolation:isolate;background:var(--surface)}
 .plot-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted);font-size:14px}
 .pl-grid{stroke:var(--line);stroke-width:1}
 .pl-glbl{fill:var(--muted);font:10px var(--mono)}
@@ -190,6 +193,32 @@ details.fold[open] summary{margin-bottom:8px}
 .leaflet-tooltip.lf-lbl{font:600 12px var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none;padding:1px 5px}
 .leaflet-tooltip.lf-lbl::before{display:none}
 .leaflet-control-layers{font:14px var(--sans)}
+/* sin contacto */
+.card.warn{box-shadow:inset 5px 0 0 var(--mov)} .card.crit{box-shadow:inset 5px 0 0 var(--fire)}
+.nc{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em}
+.nc.warn{color:var(--mov)} .nc.crit{color:var(--fire)}
+.side.stack{display:flex;flex-direction:column;gap:6px}
+.rcgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rcgrid .btn{padding:16px 4px;font-size:18px;font-family:var(--mono)}
+.rcgrid .btn.sc{grid-column:1/-1;color:var(--fire)}
+.toolbar{background:var(--surface);border:1px solid var(--accent);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.toolbar #tool-msg{font-family:var(--mono);font-size:14px}
+.btn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#plot{-webkit-touch-callout:none}
+.lf-arrow{pointer-events:none}
+/* modo noche: todo en rojo sobre negro */
+html[data-night] body{background:#000}
+html[data-night] :is(header,main,.sheet>.form,.toast){filter:grayscale(1) sepia(1) saturate(9) hue-rotate(-38deg) brightness(.82) contrast(1.05)}
+/* botones grandes (guantes) */
+html.big body{font-size:18px}
+html.big .btn{padding:12px 16px;font-size:17px}
+html.big .btn.small{padding:10px 14px;font-size:16px}
+html.big .btn.primary{padding:16px 18px;font-size:19px}
+html.big :is(input[type=text],input[type=search],input[type=number],input[type=datetime-local],textarea,select){font-size:20px;padding:13px 12px}
+html.big .seg label{padding:15px 4px;font-size:16px}
+html.big .chip{padding:9px 14px;font-size:16px}
+html.big nav button{font-size:17px;padding:12px 2px}
+html.big .item .cs{font-size:21px}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 </style>
 </head>
@@ -197,7 +226,7 @@ details.fold[open] summary{margin-bottom:8px}
 
 
 <header>
-  <div class="hrow"><h1>Registro de malla</h1><span class="clock" id="clock">—</span></div>
+  <div class="hrow"><h1>Registro de malla</h1><span class="clock" id="clock">—</span><button class="btn small" type="button" id="night-q" aria-pressed="false">Noche</button></div>
   <nav role="tablist">
     <button role="tab" data-tab="reg" aria-selected="true">Registro</button>
     <button role="tab" data-tab="map" aria-selected="false">Mapa</button>
@@ -230,6 +259,7 @@ details.fold[open] summary{margin-bottom:8px}
     </form>
 
     <div class="sumbar" id="sum"></div>
+    <div class="actions"><button class="btn" type="button" id="relevo-btn">Resumen de relevo</button></div>
     <input type="search" id="q" placeholder="Buscar indicativo, zona, acción…" aria-label="Buscar">
     <div>
       <span class="h2">En malla</span>
@@ -244,15 +274,18 @@ details.fold[open] summary{margin-bottom:8px}
 
   <section class="panel" id="tab-map" hidden>
     <div class="seg" id="mapmode" role="radiogroup" aria-label="Tipo de mapa">
-      <input type="radio" name="mm" id="mm-plot" value="plot" checked><label for="mm-plot">PLANO</label>
-      <input type="radio" name="mm" id="mm-real" value="real"><label for="mm-real">MAPA REAL</label>
+      <input type="radio" name="mm" id="mm-real" value="real" checked><label for="mm-real">MAPA REAL</label>
+      <input type="radio" name="mm" id="mm-plot" value="plot"><label for="mm-plot">PLANO (SIN INTERNET)</label>
     </div>
+    <div class="maptools"><button class="btn small" type="button" id="t-measure">Medir</button><button class="btn small" type="button" id="t-zone">Dibujar zona</button><span class="note">Mantén el dedo en el mapa para añadir un punto ahí.</span></div>
+    <div class="toolbar" id="tool-bar" hidden><span id="tool-msg"></span><div class="actions"><button class="btn small" type="button" id="tool-done" hidden>Terminar zona</button><button class="btn small" type="button" id="tool-undo" hidden>Quitar último</button><button class="btn small" type="button" id="tool-cancel">Cerrar</button></div></div>
     <div id="plot-wrap" style="display:flex;flex-direction:column;gap:8px">
       <div id="plot"></div>
       <div class="maptools"><button class="btn small" type="button" id="z-in" aria-label="Acercar">＋</button><button class="btn small" type="button" id="z-out" aria-label="Alejar">－</button><button class="btn small" type="button" id="z-fit">Ver todo</button><label><input type="checkbox" id="trail" checked> Rastro</label></div>
       <p class="note">Funciona sin internet. Cuadrícula UTM/MGRS, norte arriba. Arrastra para mover y pellizca para acercar.</p>
     </div>
     <div id="rmap-wrap" hidden style="display:flex;flex-direction:column;gap:8px">
+      <p class="banner" id="offline-note" hidden>Sin internet: solo se ve el mapa de las zonas que ya hayas visto o guardado. Si sale gris, usa PLANO.</p>
       <div id="rmap"></div>
       <div class="maptools"><button class="btn small" type="button" id="dl-zone">Guardar esta zona para usar sin internet</button><span class="note" id="dl-status"></span></div>
       <p class="note">Sin internet solo se ven las zonas que ya hayas visto o guardado. Al cargar el mapa, OpenTopoMap, OpenStreetMap o Esri ven qué zona miras (no ven tus registros).</p>
@@ -263,6 +296,10 @@ details.fold[open] summary{margin-bottom:8px}
       <div class="list" id="map-list" style="margin-top:8px"></div>
       <p class="note" id="nocoord" style="margin-top:6px"></p>
     </div>
+    <div>
+      <span class="h2">Zonas</span>
+      <div class="list" id="zone-list" style="margin-top:8px"></div>
+    </div>
   </section>
 
   <section class="panel" id="tab-cop" hidden>
@@ -272,6 +309,21 @@ details.fold[open] summary{margin-bottom:8px}
       <label for="pc-coord">Coordenadas del puesto<input type="text" id="pc-coord" class="upper" placeholder="30T VK 12345 67890" autocapitalize="characters" spellcheck="false"></label>
       <p class="hint" id="pc-hint"></p>
       <div class="actions"><button class="btn" type="button" id="pc-save">Guardar posición</button><button class="btn" type="button" id="pc-gps">Usar mi ubicación</button></div>
+    </div>
+
+    <div class="form">
+      <span class="h2">Aviso de tiempo sin contacto</span>
+      <p class="note">Si una unidad en malla lleva este tiempo sin comunicar, su tarjeta se marca en amarillo y luego en rojo. Un radiocheck «sin contacto» no cuenta como contacto.</p>
+      <div class="row">
+        <label for="cfg-warn">Amarillo a los (min)<input type="number" id="cfg-warn" inputmode="numeric" min="1"></label>
+        <label for="cfg-crit">Rojo a los (min)<input type="number" id="cfg-crit" inputmode="numeric" min="1"></label>
+      </div>
+    </div>
+
+    <div class="form">
+      <span class="h2">Pantalla</span>
+      <label style="flex-direction:row;align-items:center;gap:10px;font-size:16px;color:var(--ink)"><input type="checkbox" id="ui-night"> Modo noche (rojo sobre negro)</label>
+      <label style="flex-direction:row;align-items:center;gap:10px;font-size:16px;color:var(--ink)"><input type="checkbox" id="ui-big"> Botones y letra grandes (para guantes)</label>
     </div>
 
     <div class="form">
@@ -365,6 +417,37 @@ details.fold[open] summary{margin-bottom:8px}
     <label for="p-note">Nota<textarea id="p-note" placeholder="Qué es, cuántos, dirección, altura…"></textarea></label>
     <div id="p-hist"></div>
     <div class="actions"><button class="btn primary" type="submit">Guardar</button><button class="btn" type="button" id="p-cancel">Cancelar</button><button class="btn danger" type="button" id="p-close" hidden>Quitar del mapa</button></div>
+  </form>
+</div>
+
+<div class="sheet" id="rc-sheet" hidden>
+  <div class="form" role="dialog" aria-label="Radiocheck">
+    <div class="tl-head"><span class="h2" id="rc-title">Radiocheck</span><button class="btn small" type="button" id="rc-close">Cerrar</button></div>
+    <p class="note">Toca cómo te llega. Se guarda con la hora actual y mantiene su estado.</p>
+    <div class="rcgrid">
+      <button class="btn" type="button" data-rcv="5/5">5/5</button><button class="btn" type="button" data-rcv="4/5">4/5</button><button class="btn" type="button" data-rcv="3/5">3/5</button>
+      <button class="btn" type="button" data-rcv="2/5">2/5</button><button class="btn" type="button" data-rcv="1/5">1/5</button><button class="btn" type="button" data-rcv="0/5">0/5</button>
+      <button class="btn sc" type="button" data-rcv="SC">SIN CONTACTO</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="relevo-sheet" hidden>
+  <div class="form" role="dialog" aria-label="Resumen de relevo">
+    <div class="tl-head"><span class="h2">Resumen de relevo</span><button class="btn small" type="button" id="relevo-close">Cerrar</button></div>
+    <label for="relevo-from">Novedades desde<input type="datetime-local" id="relevo-from"></label>
+    <textarea id="relevo-out" readonly style="font-family:var(--mono);font-size:13px;min-height:300px" aria-label="Resumen"></textarea>
+    <div class="actions"><button class="btn primary" type="button" id="relevo-copy">Copiar</button><button class="btn" type="button" id="relevo-mark">Marcar relevo ahora</button></div>
+    <p class="note">«Marcar relevo ahora» guarda esta hora para que el próximo resumen empiece desde aquí.</p>
+  </div>
+</div>
+
+<div class="sheet" id="zone-sheet" hidden>
+  <form class="form" id="fz" autocomplete="off">
+    <span class="h2">Nueva zona</span>
+    <label for="z-name">Nombre<input type="text" id="z-name" class="upper" autocapitalize="characters" placeholder="CAMPO DE TIRO 1"></label>
+    <label for="z-color">Color<select id="z-color"><option value="rojo">rojo</option><option value="amarillo">amarillo</option><option value="azul">azul</option><option value="verde">verde</option><option value="morado">morado</option><option value="gris">gris</option></select></label>
+    <div class="actions"><button class="btn primary" type="submit">Guardar zona</button><button class="btn" type="button" id="z-cancel">Cancelar</button></div>
   </form>
 </div>
 
@@ -1139,7 +1222,7 @@ const GEO=(()=>{
   return{parse,toMGRS,toUTM,fromUTM,zoneOf,dist,bearing};
 })();
 
-const VERSION='6 · 28/09/2026';
+const VERSION='9 · 28/09/2026';
 const KEY='malla-v2',DRAFT='malla-v2-draft',BK='malla-v2-backups',TAB='malla-v2-tab';
 const COLORS=['verde','amarillo','azul','rojo','morado','gris'];
 const DEF_ST=[{id:'M',n:'MOV',c:'amarillo',k:'movimiento, regreso a base, en marcha'},{id:'I',n:'INSTR',c:'azul',k:'instrucción, instruccion'},{id:'F',n:'LFX',c:'rojo',k:'ejercicio de fuego, lfx, fuego real'}];
@@ -1153,9 +1236,9 @@ try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){canS
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-const blank=()=>({app:'registro-malla',version:2,recs:[],st:JSON.parse(JSON.stringify(DEF_ST)),pts:[],pc:null,m5:1});
+const blank=()=>({app:'registro-malla',version:2,recs:[],st:JSON.parse(JSON.stringify(DEF_ST)),pts:[],zones:[],pc:null,cfg:{warn:30,crit:60},m5:1});
 let S=parse(lsGet(KEY),null)||blank();
-function fixup(){if(!Array.isArray(S.st))S.st=JSON.parse(JSON.stringify(DEF_ST));if(!Array.isArray(S.pts))S.pts=[];if(!S.m5){S.recs.forEach(r=>{if(r.tipo==='E'){const g=guessTipo(r.acc);if(g)r.tipo=g}});S.m5=1}}
+function fixup(){if(!Array.isArray(S.st))S.st=JSON.parse(JSON.stringify(DEF_ST));if(!Array.isArray(S.pts))S.pts=[];if(!Array.isArray(S.zones))S.zones=[];if(!S.cfg)S.cfg={warn:30,crit:60};if(!S.m5){S.recs.forEach(r=>{if(r.tipo==='E'){const g=guessTipo(r.acc);if(g)r.tipo=g}});S.m5=1}}
 let backups=parse(lsGet(BK),[]);
 let editId=null;
 
@@ -1231,19 +1314,27 @@ function byCs(){const m={};[...S.recs].sort((a,b)=>a.t<b.t?-1:1).forEach(r=>{(m[
 function nums(r){const p=[];if(r.veh!=null)p.push(r.veh+' veh');if(r.pax!=null)p.push(r.pax+' pax');if(r.zona)p.push(esc(r.zona));return p.join(' · ')}
 function entryTime(rs){let t=null;rs.forEach((r,i)=>{if(r.tipo!=='S'&&(i===0||rs[i-1].tipo==='S'))t=r.t});return t}
 
+/* tiempo sin contacto */
+function contact(rs){const lc=[...rs].reverse().find(r=>r.rc!=='SC')||rs[0];const ms=Date.now()-new Date(lc.t);const m=ms/60000;return{ms,level:m>=(+S.cfg.crit||60)?'crit':m>=(+S.cfg.warn||30)?'warn':''}}
+/* rumbo y velocidad a partir de las dos últimas posiciones */
+function motion(track){if(!track||track.length<2)return null;const a=track[track.length-2],b=track[track.length-1];const h=(new Date(b.t)-new Date(a.t))/36e5;const d=GEO.dist(a.lat,a.lon,b.lat,b.lon);if(d<10)return{still:true};if(h<=0)return{brg:GEO.bearing(a.lat,a.lon,b.lat,b.lon),kmh:null};return{brg:GEO.bearing(a.lat,a.lon,b.lat,b.lon),kmh:d/1000/h}}
+function motionTxt(mo){if(!mo)return'';if(mo.still)return'Parado (misma posición)';return'Va hacia '+fmtB(mo.brg)+(mo.kmh!=null?' · '+(mo.kmh<10?mo.kmh.toFixed(1).replace('.',','):Math.round(mo.kmh))+' km/h':'')}
+
 /* render */
 function card(rs){
   const last=rs[rs.length-1],out=last.tipo==='S';
   const since=out?'salió '+dhm(last.t):'desde '+dhm(last.t);
   const ent=!out&&entryTime(rs);
-  return `<div class="item card${out?' out':''}" data-cs="${esc(last.cs)}" role="button" tabindex="0">
+  const nc=out?{level:''}:contact(rs);
+  return `<div class="item card${out?' out':''}${nc.level?' '+nc.level:''}" data-cs="${esc(last.cs)}" role="button" tabindex="0">
     ${badge(last)}
     <div class="top"><span class="cs">${esc(last.cs)}</span><span class="t">${since}</span></div>
     ${nums(last)?`<div class="nums">${nums(last)}</div>`:''}
     ${(()=>{const p=[...rs].reverse().find(r=>r.coord);return p?posHTML(p,p!==last?' (a las '+hm(p.t)+')':''):''})()}
     ${last.acc?`<div class="acc">${esc(last.acc)}</div>`:''}
+    ${nc.level?`<div class="nc ${nc.level}">SIN CONTACTO ${dur(nc.ms).toUpperCase()}</div>`:''}
     <div class="nums">${ent?'Entró '+dhm(ent)+' · ':''}${rs.length} ${rs.length===1?'registro':'registros'}</div>
-    ${out?'':`<div class="side"><button class="btn small" type="button" data-upd="${esc(last.cs)}">Actualizar</button></div>`}
+    ${out?'':`<div class="side stack"><button class="btn small" type="button" data-upd="${esc(last.cs)}">Actualizar</button><button class="btn small" type="button" data-rc="${esc(last.cs)}">Radiocheck</button></div>`}
   </div>`;
 }
 function render(){
@@ -1255,7 +1346,7 @@ function render(){
   // resumen
   const tv=inG.reduce((s,g)=>s+(g[g.length-1].veh||0),0),tp=inG.reduce((s,g)=>s+(g[g.length-1].pax||0),0);
   const cnt={};inG.forEach(g=>{const l=LB[g[g.length-1].id];const k=l.txt+'|'+l.cls;cnt[k]=(cnt[k]||0)+1});
-  $('#sum').innerHTML=`<span><b>${inG.length}</b> en malla</span><span><b>${tv}</b> veh</span><span><b>${tp}</b> pax</span>`+Object.entries(cnt).map(([k,n])=>{const[t,c]=k.split('|');return `<span class="pill ${c}">${n} ${esc(t)}</span>`}).join('');
+  $('#sum').innerHTML=`<span><b>${inG.length}</b> en malla</span><span><b>${tv}</b> veh</span><span><b>${tp}</b> pax</span>`+Object.entries(cnt).map(([k,n])=>{const[t,c]=k.split('|');return `<span class="pill ${c}">${n} ${esc(t)}</span>`}).join('')+(()=>{const n=inG.filter(g=>contact(g).level).length;return n?`<span class="pill c-rojo">${n} sin contacto</span>`:''})();
   const match=g=>!q||g.some(r=>norm([r.cs,r.zona,r.acc].join(' ')).includes(q));
   const fi=inG.filter(match),fo=outG.filter(match);
   $('#l-in').innerHTML=fi.length?fi.map(card).join(''):(q?'<div class="empty">Nada coincide con la búsqueda.</div>':
@@ -1266,7 +1357,7 @@ function render(){
   const uniq=a=>[...new Set(a.filter(Boolean))];
   $('#l-cs').innerHTML=uniq(S.recs.map(r=>r.cs)).map(v=>`<option value="${esc(v)}">`).join('');
   $('#l-zona').innerHTML=uniq(S.recs.map(r=>r.zona)).map(v=>`<option value="${esc(v)}">`).join('');
-  const used=uniq([...S.recs].sort((a,b)=>a.t<b.t?1:-1).map(r=>r.acc)).filter(a=>a.length<=30&&!PRESETS.includes(a)).slice(0,5);
+  const used=uniq([...S.recs].sort((a,b)=>a.t<b.t?1:-1).map(r=>r.acc)).filter(a=>a.length<=30&&!PRESETS.includes(a)&&!/^Radiocheck/.test(a)).slice(0,5);
   $('#acc-chips').innerHTML=[...PRESETS,...used].map(a=>`<button type="button" class="chip">${esc(a)}</button>`).join('');
   renderBackups();
   if(tlCs&&!$('#tl-sheet').hidden)openTimeline(tlCs);
@@ -1386,6 +1477,7 @@ function openTimeline(cs){
 function closeTimeline(){$('#tl-sheet').hidden=true;tlCs=null}
 document.addEventListener('click',e=>{
   const u=e.target.closest('[data-upd]');if(u){e.stopPropagation();fillFor(u.dataset.upd);return}
+  const rc=e.target.closest('[data-rc]');if(rc){e.stopPropagation();openRC(rc.dataset.rc);return}
   const c=e.target.closest('.card[data-cs]');if(c)openTimeline(c.dataset.cs);
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches&&e.target.matches('.card,.ev[data-id]'))e.target.click()});
@@ -1417,7 +1509,7 @@ $('#exp-dl').addEventListener('click',()=>download(expName,$('#exp-out').value))
 
 /* copias */
 const valid=d=>d&&Array.isArray(d.recs);
-function restore(d){snapshot('pre');S=JSON.parse(JSON.stringify(d));fixup();renderStates();renderSegs();initPC();view=null;fitReal=true;save('Copia restaurada')}
+function restore(d){snapshot('pre');S=JSON.parse(JSON.stringify(d));fixup();renderStates();renderSegs();initPC();initCfg();view=null;fitReal=true;save('Copia restaurada')}
 $('#bk-make').addEventListener('click',()=>{snapshot('manual');renderBackups();toast('Copia creada')});
 $('#l-bk').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const bk=backups.find(x=>x.id===b.closest('.item').dataset.id);if(!bk)return;
@@ -1429,7 +1521,7 @@ $('#bk-copy').addEventListener('click',()=>copyFrom(bkText()));
 $('#bk-dl').addEventListener('click',()=>{const ta=bkText();download(ta.dataset.name||'copia-malla.json',ta.value)});
 $('#bk-rest').addEventListener('click',e=>{const d=parse($('#bk-text').value.trim(),null);if(!valid(d)){toast('Eso no es una copia válida');return}confirmTap(e.currentTarget,'Confirmar',()=>{restore(d);$('#bk-text').value=''})});
 $('#bk-file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{if(!valid(parse(r.result,null))){toast('El archivo no es una copia válida');return}$('#bk-text').value=r.result;toast('Cargado. Pulsa Restaurar')};r.readAsText(f);e.target.value=''});
-$('#wipe').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar: borrar todo',()=>{snapshot('wipe');const st=S.st,pc=S.pc;S=blank();S.st=st;S.pc=pc;save('Todo borrado. Hay copia en la lista')}));
+$('#wipe').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar: borrar todo',()=>{snapshot('wipe');const st=S.st,pc=S.pc,cfg=S.cfg;S=blank();S.st=st;S.pc=pc;S.cfg=cfg;save('Todo borrado. Hay copia en la lista')}));
 
 /* puesto de mando */
 function initPC(){$('#pc-coord').value=S.pc?S.pc.coord:'';coordHint($('#pc-coord'),$('#pc-hint'),true)}
@@ -1490,7 +1582,7 @@ function mapItems(){
   Object.values(byCs()).forEach(rs=>{const last=rs[rs.length-1];if(last.tipo==='S')return;const tr=rs.filter(r=>r.lat!=null);if(!tr.length){noPos.push(last.cs);return}
     const l=LB[last.id]||{cls:stCls(last.tipo),txt:stName(last.tipo)};units.push({type:'u',key:last.cs,name:last.cs,cls:l.cls,txt:l.txt,pos:tr[tr.length-1],track:tr,t:last.t,acc:last.acc})});
   const pts=S.pts.filter(p=>!p.closed).map(p=>{const tr=p.hist.filter(h=>h.lat!=null);return tr.length?{type:'p',key:p.id,name:p.name,kind:p.kind,air:p.air,pos:tr[tr.length-1],track:tr,t:p.hist[p.hist.length-1].t,note:p.hist[p.hist.length-1].note}:null}).filter(Boolean);
-  return{units,pts,pc:pcPos(),noPos};
+  return{units,pts,pc:pcPos(),noPos,zones:S.zones};
 }
 function colorOf(cls){const sp=document.createElement('span');sp.className=cls;sp.hidden=true;document.body.appendChild(sp);const c=getComputedStyle(sp).getPropertyValue('--c').trim()||getComputedStyle(sp).getPropertyValue('--k').trim()||'#888';sp.remove();return c}
 function openItem(type,key){if(type==='u')openTimeline(key);else if(type==='p')openPoint(key)}
@@ -1503,7 +1595,9 @@ function renderMap(){
   if(mapMode==='plot')renderPlot();else renderReal();
   renderMapList();
 }
-$('#mapmode').addEventListener('change',renderMap);
+$('#mapmode').addEventListener('change',()=>{lsSet('malla-mapmode',document.querySelector('input[name=mm]:checked').value);renderMap()});
+{const mm=lsGet('malla-mapmode');const def=mm||((window.claude||!window.L)?'plot':'real');document.getElementById('mm-'+def).checked=true}
+window.addEventListener('online',()=>{if(!$('#tab-map').hidden)renderMap()});window.addEventListener('offline',()=>{if(!$('#tab-map').hidden)renderMap()});
 
 function renderMapList(){
   const{units,pts,pc,noPos}=mapItems();
@@ -1515,18 +1609,22 @@ function renderMapList(){
       ${it.type==='u'?`<span class="badge ${it.cls}">${esc(it.txt)}</span>`:`<span class="badge kb k-${it.kind}">${it.air==='plane'?'RAVEN':KINDS[it.kind]}</span>`}
       <div class="top"><span class="cs">${esc(it.name)}</span><span class="t">${dhm(it.pos.t)}</span></div>
       ${posHTML(it.pos)}
+      ${(()=>{const t=motionTxt(motion(it.track));return t?`<div class="nums">${t}</div>`:''})()}
+      ${(()=>{const z=zonesAt(it.pos);return z.length?`<div class="nums">En zona: ${z.map(esc).join(', ')}</div>`:''})()}
       ${it.type==='p'&&it.note?`<div class="acc">${esc(it.note)}</div>`:''}
       <div class="side">${apple(it)}</div>
     </div>`).join('')||'<div class="empty">Todavía no hay nada con coordenadas.</div>';
-  $('#nocoord').textContent=(noPos.length?'En malla sin coordenadas: '+noPos.join(', ')+'. ':'')+(pc?'':'Pon la posición del puesto de mando en Ajustes para ver distancias y rumbos.');
+  renderZoneList();
+  $('#nocoord').textContent=(noPos.length?'No salen en el mapa porque no tienen coordenadas: '+noPos.join(', ')+'. Añádeselas con «Actualizar» en la pestaña Registro. ':'')+(pc?'':'Pon la posición del puesto de mando en Ajustes para verlo en el mapa y tener distancias y rumbos.');
 }
 document.addEventListener('click',e=>{const it=e.target.closest('[data-item]');if(!it||e.target.closest('a'))return;const i=it.dataset.item.indexOf(':');openItem(it.dataset.item.slice(0,i),it.dataset.item.slice(i+1))});
 
 /* plano táctico (sin internet) */
-let view=null,plotRAF=0;
+let view=null,plotRAF=0,plotState=null,tool=null;
+function plotToLL(px,py){const st=plotState;if(!st)return null;const e=st.cx+(px-st.W/2)*st.mpp,y=st.cy-(py-st.H/2)*st.mpp,south=y<0;return GEO.fromUTM(st.Z,e,south?y+1e7:y,south)}
 function projector(ref){const Z=GEO.zoneOf(ref.lat,ref.lon);return{Z,f:o=>{const u=GEO.toUTM(o.lat,o.lon,Z);return[u.e,u.n-(u.south?1e7:0)]}}}
 function fitView(W,H){
-  const{units,pts,pc}=mapItems();const all=[...units.map(u=>u.pos),...pts.map(p=>p.pos),...(pc?[pc]:[])];
+  const{units,pts,pc,zones}=mapItems();const all=[...units.map(u=>u.pos),...pts.map(p=>p.pos),...(pc?[pc]:[]),...zones.flatMap(z=>z.pts)];
   if(!all.length)return null;const pr=projector(pc||all[0]);const xy=all.map(pr.f);
   const xs=xy.map(p=>p[0]),ys=xy.map(p=>p[1]);const minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
   const mpp=all.length===1?5:Math.max((maxx-minx)/(W-170),(maxy-miny)/(H-90),2);
@@ -1534,9 +1632,9 @@ function fitView(W,H){
 }
 function renderPlot(){
   const box=$('#plot');const W=box.clientWidth||360,H=Math.round(Math.min(W*1.05,window.innerHeight*0.6));box.style.height=H+'px';
-  const{units,pts,pc}=mapItems();
-  if(!units.length&&!pts.length&&!pc){box.innerHTML='<div class="plot-empty">Aún no hay posiciones. Escribe coordenadas al registrar una unidad, añade un dron, un enemigo o un punto, o pon la posición del puesto de mando en Ajustes.</div>';view=null;return}
-  const pr=projector(pc||(units[0]||pts[0]).pos);
+  const{units,pts,pc,zones}=mapItems();
+  if(!units.length&&!pts.length&&!pc&&!zones.length){box.innerHTML='<div class="plot-empty">Aún no hay posiciones. Escribe coordenadas al registrar una unidad, añade un dron, un enemigo o un punto, o pon la posición del puesto de mando en Ajustes.</div>';view=null;return}
+  const pr=projector(pc||(units[0]||pts[0]||{pos:zones[0]&&zones[0].pts[0]}).pos);
   if(!view||view.Z!==pr.Z||!view.user)view=fitView(W,H);
   const{cx,cy,mpp}=view,X=x=>W/2+(x-cx)/mpp,Y=y=>H/2-(y-cy)/mpp;
   const steps=[50,100,200,250,500,1000,2000,2500,5000,10000,20000,25000,50000,100000,200000,500000];
@@ -1546,8 +1644,10 @@ function renderPlot(){
   const lab=(v,north)=>{if(north&&v<0)v+=1e7;const km=v/1000;return step>=1000?String(Math.floor(km+1e-6)%100).padStart(2,'0'):(km%100).toFixed(1).padStart(4,'0')};
   for(let x=x0;x<=x1;x+=step){const px=X(x).toFixed(1);g+=`<line class="pl-grid" x1="${px}" y1="0" x2="${px}" y2="${H}"/><text class="pl-glbl" x="${+px+3}" y="11">${lab(x)}</text>`}
   for(let y=y0;y<=y1;y+=step){const py=Y(y).toFixed(1);g+=`<line class="pl-grid" x1="0" y1="${py}" x2="${W}" y2="${py}"/><text class="pl-glbl" x="3" y="${+py-3}">${lab(y,true)}</text>`}
+  plotState={W,H,Z:pr.Z,cx,cy,mpp};
   const trail=$('#trail').checked;let body='';
   const P=o=>{const[a,b]=pr.f(o);return[X(a),Y(b)]};
+  zones.forEach(z=>{const xy=z.pts.map(P);const c=xy.reduce((s,p)=>[s[0]+p[0]/xy.length,s[1]+p[1]/xy.length],[0,0]);body+=`<g class="c-${z.c}"><polygon points="${xy.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" style="fill:var(--c);stroke:var(--c)" fill-opacity=".14" stroke-width="2" stroke-dasharray="7 4"/><text class="pl-lbl" x="${c[0].toFixed(1)}" y="${c[1].toFixed(1)}" text-anchor="middle" style="fill:var(--c)">${esc(z.name)}</text></g>`});
   const pcxy=pc?P(pc):null;
   const sym=(it,x,y)=>{
     if(it.type==='u')return`<circle cx="${x}" cy="${y}" r="10" style="fill:var(--c)" stroke="var(--surface)" stroke-width="2"/>`;
@@ -1560,27 +1660,36 @@ function renderPlot(){
     let t='';
     if(trail&&it.track.length>1){const ptsS=it.track.map(o=>P(o).map(v=>v.toFixed(1)).join(',')).join(' ');t=`<polyline points="${ptsS}" fill="none" style="stroke:var(${it.type==='u'?'--c':'--k'})" stroke-width="2" stroke-dasharray="5 4" opacity=".7"/>`+it.track.slice(0,-1).map(o=>{const[a,b]=P(o);return`<circle cx="${a.toFixed(1)}" cy="${b.toFixed(1)}" r="3" style="fill:var(${it.type==='u'?'--c':'--k'})" opacity=".7"/>`}).join('')}
     const rel=pcxy?`<line class="pl-rel" x1="${pcxy[0].toFixed(1)}" y1="${pcxy[1].toFixed(1)}" x2="${x}" y2="${y}"/>`:'';
-    body+=`<g class="${cls}">${rel}${t}</g>`;
+    const mo=motion(it.track);let ar='';
+    if(mo&&!mo.still){const r=Math.PI*mo.brg/180,sx=Math.sin(r),sy=-Math.cos(r),x1=x+sx*17,y1=y+sy*17,x2=x+sx*44,y2=y+sy*44,hx=-sy,hy=sx;const v=it.type==='u'?'--c':'--k';ar=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" style="stroke:var(${v})" stroke-width="3" stroke-linecap="round"/><polygon points="${(x2+sx*8).toFixed(1)},${(y2+sy*8).toFixed(1)} ${(x2+hx*6).toFixed(1)},${(y2+hy*6).toFixed(1)} ${(x2-hx*6).toFixed(1)},${(y2-hy*6).toFixed(1)}" style="fill:var(${v})"/>`}
+    body+=`<g class="${cls}">${rel}${t}${ar}</g>`;
   });
   [...units,...pts].forEach(it=>{
     const cls=it.type==='u'?it.cls:'k-'+it.kind,[x,y]=P(it.pos).map(v=>+v.toFixed(1));
     body+=`<g class="${cls}" data-plot="${it.type}:${esc(it.key)}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="22" fill="transparent"/>${sym(it,x,y)}<text class="pl-lbl" x="${x+15}" y="${y+4}">${esc(it.name)}</text></g>`;
   });
   if(pcxy){const[x,y]=pcxy.map(v=>+v.toFixed(1));body+=`<g><rect x="${x-10}" y="${y-10}" width="20" height="20" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/><text class="pl-lbl" x="${x+15}" y="${y+4}">PC</text></g>`}
+  // herramienta activa (medir / zona)
+  if(tool&&tool.pts.length){const xy=tool.pts.map(P);const ptsS=xy.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+    body+=tool.type==='zone'&&xy.length>2?`<polygon points="${ptsS}" fill="var(--accent)" fill-opacity=".15" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 4"/>`:`<polyline points="${ptsS}" fill="none" stroke="var(--accent)" stroke-width="3" ${tool.type==='zone'?'stroke-dasharray="6 4"':''}/>`;
+    body+=xy.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`).join('')}
   // escala y norte
   const sb=step/mpp;const sbl=step>=1000?(step/1000)+' km':step+' m';
   const deco=`<g transform="translate(12,${H-16})"><rect x="0" y="-5" width="${sb.toFixed(1)}" height="5" fill="var(--ink)"/><rect x="${(sb/2).toFixed(1)}" y="-5" width="${(sb/2).toFixed(1)}" height="5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1"/><text class="pl-lbl" x="0" y="-9">${sbl}</text></g><g transform="translate(${W-22},30)"><polygon points="0,-16 7,4 0,0 -7,4" fill="var(--ink)"/><text class="pl-lbl" x="-4" y="18">N</text></g>`;
   box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plano táctico">${g}${body}${deco}</svg>`;
 }
 function schedPlot(){cancelAnimationFrame(plotRAF);plotRAF=requestAnimationFrame(renderPlot)}
-(()=>{const box=$('#plot'),ptrs=new Map();let moved=0,pinch=null;
-  box.addEventListener('pointerdown',e=>{if(!view)return;box.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size===1)moved=0;if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mpp:view.mpp}}});
+(()=>{const box=$('#plot'),ptrs=new Map();let moved=0,pinch=null,lp=0,lpFired=false;
+  const rel=e=>{const r=box.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+  box.addEventListener('contextmenu',e=>e.preventDefault());
+  box.addEventListener('pointerdown',e=>{if(!view)return;box.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size===1){moved=0;lpFired=false;clearTimeout(lp);const[px,py]=rel(e);lp=setTimeout(()=>{if(moved<8&&ptrs.size===1&&!tool){lpFired=true;const ll=plotToLL(px,py);if(ll)onMapHold(ll.lat,ll.lon)}},600)}else clearTimeout(lp);if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mpp:view.mpp}}});
   box.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId)||!view)return;const pv=ptrs.get(e.pointerId),dx=e.clientX-pv.x,dy=e.clientY-pv.y;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved+=Math.abs(dx)+Math.abs(dy);
-    if(moved>8)view.user=true;
+    if(moved>8){view.user=true;clearTimeout(lp)}
     if(ptrs.size===1){view.cx-=dx*view.mpp;view.cy+=dy*view.mpp;schedPlot()}
     else if(ptrs.size===2&&pinch){const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>0){view.mpp=Math.min(20000,Math.max(.3,pinch.mpp*pinch.d/d));schedPlot()}}});
-  const up=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;
-    if(ptrs.size===0&&moved<8){const el=document.elementFromPoint(e.clientX,e.clientY);const t=el&&el.closest('[data-plot]');if(t){const i=t.dataset.plot.indexOf(':');openItem(t.dataset.plot.slice(0,i),t.dataset.plot.slice(i+1))}}};
+  const up=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;clearTimeout(lp);
+    if(ptrs.size===0&&moved<8&&!lpFired&&tool){const[px,py]=rel(e);const ll=plotToLL(px,py);if(ll)addToolPt(ll.lat,ll.lon);return}
+    if(ptrs.size===0&&moved<8&&!lpFired){const el=document.elementFromPoint(e.clientX,e.clientY);const t=el&&el.closest('[data-plot]');if(t){const i=t.dataset.plot.indexOf(':');openItem(t.dataset.plot.slice(0,i),t.dataset.plot.slice(i+1))}}};
   box.addEventListener('pointerup',up);box.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);pinch=null});
   box.addEventListener('wheel',e=>{if(!view)return;e.preventDefault();view.user=true;view.mpp=Math.min(20000,Math.max(.3,view.mpp*(e.deltaY>0?1.2:1/1.2)));schedPlot()},{passive:false});
 })();
@@ -1591,9 +1700,10 @@ $('#trail').addEventListener('change',renderPlot);
 window.addEventListener('resize',()=>{if(!$('#tab-map').hidden&&mapMode==='plot')schedPlot()});
 
 /* mapa real (Leaflet) */
-let LM=null,LG=null,curLayer=null,fitReal=true;
+let LM=null,LG=null,LT=null,curLayer=null,fitReal=true;
 function renderReal(){
   const box=$('#rmap');
+  $('#offline-note').hidden=navigator.onLine!==false;
   if(window.claude||!window.L){box.innerHTML='<div class="plot-empty">El mapa real solo funciona en la app instalada desde GitHub. Aquí usa el plano o el botón de Apple Maps.</div>';$('#dl-zone').hidden=true;return}
   if(!LM){
     const o={crossOrigin:true};
@@ -1604,10 +1714,13 @@ function renderReal(){
     topo.addTo(LM);curLayer=topo;
     L.control.layers({'Topográfico':topo,'Calles':osm,'Satélite':sat},null,{collapsed:false}).addTo(LM);
     LM.on('baselayerchange',e=>{curLayer=e.layer});
-    LG=L.layerGroup().addTo(LM);
+    LG=L.layerGroup().addTo(LM);LT=L.layerGroup().addTo(LM);
+    LM.on('contextmenu',e=>{if(!tool)onMapHold(e.latlng.lat,e.latlng.lng)});
+    LM.on('click',e=>{if(tool)addToolPt(e.latlng.lat,e.latlng.lng)});
   }
   LG.clearLayers();
-  const{units,pts,pc}=mapItems(),bounds=[];const trail=$('#trail').checked;
+  const{units,pts,pc,zones}=mapItems(),bounds=[];const trail=$('#trail').checked;
+  zones.forEach(z=>{const col=colorOf('c-'+z.c);const ll=z.pts.map(p=>[p.lat,p.lon]);bounds.push(...ll);L.polygon(ll,{color:col,weight:2,dashArray:'7 4',fillOpacity:.14,interactive:false}).bindTooltip(z.name,{permanent:true,direction:'center',className:'lf-lbl'}).addTo(LG)});
   const lbl=(m,t)=>m.bindTooltip(t,{permanent:true,direction:'right',offset:[10,0],className:'lf-lbl'});
   if(pc){bounds.push([pc.lat,pc.lon]);lbl(L.marker([pc.lat,pc.lon],{icon:L.divIcon({className:'',html:'<div class="lf-sym lf-pc"></div>',iconSize:[20,20],iconAnchor:[10,10]})}),'PC').addTo(LG)}
   [...units,...pts].forEach(it=>{
@@ -1617,8 +1730,11 @@ function renderReal(){
     const isD=it.type==='p'&&it.kind==='dron';
     const html=it.type==='u'?`<div class="lf-sym lf-u ${cls}"></div>`:isD?`<svg width="30" height="30" viewBox="0 0 30 30" style="overflow:visible">${airSVG(it,15,15,col,'#fff')}</svg>`:`<div class="lf-sym lf-${it.kind}"></div>`;
     const m=L.marker(ll,{icon:L.divIcon({className:'',html,iconSize:isD?[30,30]:[18,18],iconAnchor:isD?[15,15]:[9,9]})});
-    lbl(m,it.name).on('click',()=>openItem(it.type,it.key)).addTo(LG);
+    lbl(m,it.name).on('click',()=>{if(!tool)openItem(it.type,it.key)}).addTo(LG);
+    const mo=motion(it.track);
+    if(mo&&!mo.still)L.marker(ll,{interactive:false,icon:L.divIcon({className:'lf-arrow',html:`<svg width="100" height="100" viewBox="0 0 100 100" style="overflow:visible"><g transform="rotate(${mo.brg.toFixed(0)} 50 50)"><line x1="50" y1="33" x2="50" y2="8" stroke="${col}" stroke-width="4" stroke-linecap="round"/><polygon points="50,0 57,12 43,12" fill="${col}"/></g></svg>`,iconSize:[100,100],iconAnchor:[50,50]})}).addTo(LG);
   });
+  drawToolReal();
   setTimeout(()=>{LM.invalidateSize();if(fitReal&&bounds.length){LM.fitBounds(bounds,{padding:[50,50],maxZoom:15});fitReal=false}},60);
 }
 $('#dl-zone').addEventListener('click',async()=>{
@@ -1632,12 +1748,89 @@ $('#dl-zone').addEventListener('click',async()=>{
   $('#dl-zone').disabled=false;$('#dl-status').textContent=fail?`Guardadas ${done-fail} de ${list.length}. Sin conexión no se pudieron bajar ${fail}.`:`Zona guardada (${list.length} trozos de mapa, zoom ${z0} a ${maxZ}).`;
 });
 
+/* mantener pulsado el mapa: nuevo punto con esas coordenadas */
+function onMapHold(lat,lon){if(navigator.vibrate)try{navigator.vibrate(30)}catch(e){}openPoint(null);$('#p-coord').value=GEO.toMGRS(lat,lon);coordHint($('#p-coord'),$('#p-hint'))}
+
+/* herramientas: medir y dibujar zona */
+function setTool(type){tool=type&&(!tool||tool.type!==type)?{type,pts:[]}:null;$('#t-measure').classList.toggle('on',!!tool&&tool.type==='measure');$('#t-zone').classList.toggle('on',!!tool&&tool.type==='zone');toolMsg();redrawTool()}
+function toolMsg(){const bar=$('#tool-bar');bar.hidden=!tool;if(!tool)return;const n=tool.pts.length;
+  if(tool.type==='measure'){let m=n===0?'Toca el primer punto en el mapa.':n===1?'Toca el segundo punto.':'';
+    if(n>=2){let tot=0;for(let i=1;i<n;i++)tot+=GEO.dist(tool.pts[i-1].lat,tool.pts[i-1].lon,tool.pts[i].lat,tool.pts[i].lon);const a=tool.pts[n-2],b=tool.pts[n-1];
+      m=(n>2?'Total '+fmtD(tot)+'. Último tramo: ':'')+fmtD(GEO.dist(a.lat,a.lon,b.lat,b.lon))+' · rumbo '+fmtB(GEO.bearing(a.lat,a.lon,b.lat,b.lon))+'\n'+GEO.toMGRS(a.lat,a.lon)+' → '+GEO.toMGRS(b.lat,b.lon)+'\nToca otro punto para seguir midiendo.'}
+    $('#tool-msg').innerText=m}
+  else $('#tool-msg').innerText=n<3?`Toca los vértices de la zona (${n} de al menos 3).`:`Zona con ${n} vértices. Toca más o pulsa «Terminar zona».`;
+  $('#tool-done').hidden=!(tool.type==='zone'&&n>=3);$('#tool-undo').hidden=!n}
+function addToolPt(lat,lon){if(!tool)return;tool.pts.push({lat,lon});toolMsg();redrawTool()}
+function redrawTool(){if(mapMode==='plot')renderPlot();else drawToolReal()}
+function drawToolReal(){if(!LT)return;LT.clearLayers();if(!tool||!tool.pts.length)return;const col=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#E49A3C';const ll=tool.pts.map(p=>[p.lat,p.lon]);
+  (tool.type==='zone'&&ll.length>2?L.polygon(ll,{color:col,weight:2,dashArray:'6 4',fillOpacity:.15,interactive:false}):L.polyline(ll,{color:col,weight:3,interactive:false,dashArray:tool.type==='zone'?'6 4':null})).addTo(LT);
+  ll.forEach(p=>L.circleMarker(p,{radius:6,color:'#fff',weight:2,fillColor:col,fillOpacity:1,interactive:false}).addTo(LT))}
+$('#t-measure').addEventListener('click',()=>setTool('measure'));
+$('#t-zone').addEventListener('click',()=>setTool('zone'));
+$('#tool-cancel').addEventListener('click',()=>setTool(null));
+$('#tool-undo').addEventListener('click',()=>{if(tool){tool.pts.pop();toolMsg();redrawTool()}});
+$('#tool-done').addEventListener('click',()=>{if(!tool||tool.pts.length<3)return;$('#z-name').value='ZONA '+(S.zones.length+1);$('#zone-sheet').hidden=false});
+$('#z-cancel').addEventListener('click',()=>{$('#zone-sheet').hidden=true});
+$('#fz').addEventListener('submit',e=>{e.preventDefault();if(!tool)return;S.zones.push({id:uid(),name:$('#z-name').value.trim().toUpperCase()||'ZONA',c:$('#z-color').value,pts:tool.pts.slice(),t:new Date().toISOString()});$('#zone-sheet').hidden=true;setTool(null);save('Zona guardada')});
+function inPoly(z,lat,lon){const pr=projector(z.pts[0]);const q=pr.f({lat,lon}),P=z.pts.map(pr.f);let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const[xi,yi]=P[i],[xj,yj]=P[j];if(((yi>q[1])!==(yj>q[1]))&&(q[0]<(xj-xi)*(q[1]-yi)/(yj-yi)+xi))c=!c}return c}
+function zonesAt(pos){return pos?S.zones.filter(z=>inPoly(z,pos.lat,pos.lon)).map(z=>z.name):[]}
+function renderZoneList(){const{units,pts}=mapItems();
+  $('#zone-list').innerHTML=S.zones.map(z=>{const inside=[...units,...pts].filter(it=>inPoly(z,it.pos.lat,it.pos.lon)).map(it=>it.name);
+    return `<div class="item" data-zid="${z.id}"><span class="badge c-${z.c}">ZONA</span><div class="top"><span class="cs">${esc(z.name)}</span></div><div class="nums">${inside.length?'Dentro: '+inside.map(esc).join(', '):'Nadie dentro'}</div><div class="side"><button class="btn small danger" type="button" data-zdel="${z.id}">Borrar</button></div></div>`}).join('')||'<div class="empty">Sin zonas. Pulsa «Dibujar zona» y toca los vértices en el mapa.</div>'}
+$('#zone-list').addEventListener('click',e=>{const b=e.target.closest('[data-zdel]');if(!b)return;confirmTap(b,'Confirmar',()=>{S.zones=S.zones.filter(z=>z.id!==b.dataset.zdel);save('Zona borrada')})});
+
+/* radiocheck */
+let rcCs=null;
+function openRC(cs){rcCs=cs;$('#rc-title').textContent='Radiocheck '+cs;$('#rc-sheet').hidden=false}
+$('#rc-close').addEventListener('click',()=>{$('#rc-sheet').hidden=true});
+$('#rc-sheet').addEventListener('click',e=>{if(e.target.id==='rc-sheet'){$('#rc-sheet').hidden=true;return}const b=e.target.closest('[data-rcv]');if(!b||!rcCs)return;
+  const v=b.dataset.rcv,last=lastOf(rcCs);if(!last)return;const tipo=last.tipo==='S'?'E':last.tipo;
+  S.recs.push({id:uid(),tipo,cs:rcCs,t:new Date().toISOString(),veh:last.veh??null,pax:last.pax??null,zona:last.zona||'',acc:v==='SC'?'Radiocheck: sin contacto':'Radiocheck '+v,rc:v,tl:stName(tipo),lat:null,lon:null,coord:''});
+  $('#rc-sheet').hidden=true;save(rcCs+' · radiocheck '+(v==='SC'?'sin contacto':v))});
+
+/* resumen de relevo */
+function relevoText(fromISO){
+  LB=labels();const now=new Date().toISOString(),from=new Date(fromISO);const lab=r=>LB[r.id]?LB[r.id].txt:stName(r.tipo,r);
+  const groups=Object.values(byCs()),inG=groups.filter(g=>g[g.length-1].tipo!=='S'),outG=groups.filter(g=>g[g.length-1].tipo==='S'&&new Date(g[g.length-1].t)>=from);
+  const L2=[];L2.push('RESUMEN DE RELEVO — '+dtg(now),'Novedades desde '+dtg(fromISO),'');
+  if(pcPos())L2.push('PC: '+S.pc.coord,'');
+  const tv=inG.reduce((s,g)=>s+(g[g.length-1].veh||0),0),tp=inG.reduce((s,g)=>s+(g[g.length-1].pax||0),0);
+  L2.push(`EN MALLA: ${inG.length} · ${tv} veh · ${tp} pax`);
+  inG.forEach(g=>{const l=g[g.length-1],p=[...g].reverse().find(r=>r.coord),nc=contact(g),z=p&&p.lat!=null?zonesAt(p):[];
+    L2.push(`- ${l.cs} · ${lab(l)} desde ${hm(l.t)}${l.veh!=null?' · '+l.veh+' veh':''}${l.pax!=null?' · '+l.pax+' pax':''}${l.zona?' · '+l.zona:''}${p?' · '+p.coord:''}${z.length?' · en '+z.join(', '):''}${l.acc?' — '+l.acc:''}${nc.level?' · SIN CONTACTO '+dur(nc.ms):''}`)});
+  if(outG.length)L2.push('','SALIERON: '+outG.map(g=>g[g.length-1].cs+' ('+hm(g[g.length-1].t)+')').join(', '));
+  const act=S.pts.filter(p=>!p.closed);
+  if(act.length){L2.push('','DRONES, ENEMIGOS Y PUNTOS:');act.forEach(p=>{const h=p.hist[p.hist.length-1],tr=p.hist.filter(x=>x.lat!=null),mt=motionTxt(motion(tr));const kl=p.air==='plane'?'RAVEN':KINDS[p.kind];L2.push(`- ${p.name.startsWith(kl)?p.name:kl+' '+p.name} · ${h.coord||'sin coordenadas'} · ${hm(h.t)}${h.note?' · '+h.note:''}${mt?' · '+mt:''}`)})}
+  if(S.zones.length){L2.push('','ZONAS:');const{units,pts}=mapItems();S.zones.forEach(z=>{const inside=[...units,...pts].filter(it=>inPoly(z,it.pos.lat,it.pos.lon)).map(it=>it.name);L2.push(`- ${z.name}: ${inside.length?'dentro '+inside.join(', '):'nadie dentro'}`)})}
+  const ev=[...S.recs.filter(r=>new Date(r.t)>=from).map(r=>({t:r.t,s:`${lab(r).padEnd(8)} ${r.cs}${r.coord?' · '+r.coord:''}${r.acc?' — '+r.acc:''}`})),...S.pts.flatMap(p=>p.hist.filter(h=>new Date(h.t)>=from).map(h=>({t:h.t,s:`${(p.air==='plane'?'RAVEN':KINDS[p.kind]).padEnd(8)} ${p.name}${h.coord?' · '+h.coord:''}${h.note?' — '+h.note:''}`})))].sort((a,b)=>a.t<b.t?-1:1);
+  L2.push('',`NOVEDADES (${ev.length}):`);ev.forEach(x=>L2.push(dtg(x.t)+'  '+x.s));
+  return L2.join('\n');
+}
+function openRelevo(){const f=lsGet('malla-relevo');const d=f?new Date(f):new Date(Date.now()-8*36e5);$('#relevo-from').value=toLocal(d);$('#relevo-out').value=relevoText(d.toISOString());$('#relevo-sheet').hidden=false}
+$('#relevo-btn').addEventListener('click',openRelevo);
+$('#relevo-close').addEventListener('click',()=>{$('#relevo-sheet').hidden=true});
+$('#relevo-from').addEventListener('input',()=>{const v=fromLocal($('#relevo-from').value);if(v)$('#relevo-out').value=relevoText(v)});
+$('#relevo-copy').addEventListener('click',()=>copyFrom($('#relevo-out')));
+$('#relevo-mark').addEventListener('click',()=>{lsSet('malla-relevo',new Date().toISOString());toast('Relevo marcado a las '+hm(new Date().toISOString()))});
+
+/* avisos y pantalla */
+function initCfg(){$('#cfg-warn').value=S.cfg.warn;$('#cfg-crit').value=S.cfg.crit}
+['#cfg-warn','#cfg-crit'].forEach(id=>$(id).addEventListener('change',()=>{let w=Math.max(1,+$('#cfg-warn').value||30),c=Math.max(1,+$('#cfg-crit').value||60);if(c<w)c=w;S.cfg={warn:w,crit:c};initCfg();save('Avisos guardados')}));
+let UI=parse(lsGet('malla-ui'),{});
+function applyUI(){const r=document.documentElement;r.toggleAttribute('data-night',!!UI.night);if(UI.night){if(!r.dataset.themeWas)r.dataset.themeWas=r.getAttribute('data-theme')||'none';r.setAttribute('data-theme','dark')}else if(r.dataset.themeWas){r.dataset.themeWas==='none'?r.removeAttribute('data-theme'):r.setAttribute('data-theme',r.dataset.themeWas);delete r.dataset.themeWas}
+  r.classList.toggle('big',!!UI.big);$('#ui-night').checked=!!UI.night;$('#ui-big').checked=!!UI.big;$('#night-q').setAttribute('aria-pressed',UI.night?'true':'false');$('#night-q').classList.toggle('on',!!UI.night);$('#night-q').textContent=UI.night?'Día':'Noche';
+  if(!$('#tab-map').hidden)renderMap()}
+function setUI(k,v){UI[k]=v;lsSet('malla-ui',JSON.stringify(UI));applyUI()}
+$('#ui-night').addEventListener('change',e=>setUI('night',e.target.checked));
+$('#ui-big').addEventListener('change',e=>setUI('big',e.target.checked));
+$('#night-q').addEventListener('click',()=>setUI('night',!UI.night));
+
 /* reloj y arranque */
 function tick(){const n=new Date().toISOString();$('#clock').textContent=dtg(n)+' · '+hm(n)}
 setInterval(tick,15000);
 setInterval(()=>{if(document.activeElement===$('#q'))return;render()},60000);
 $('#ver').textContent='Versión '+VERSION;
-renderSegs();loadDraft();renderStates();initPC();persist();render();tick();coordHint($('#coord'),$('#coord-hint'));
+applyUI();initCfg();renderSegs();loadDraft();renderStates();initPC();persist();render();tick();coordHint($('#coord'),$('#coord-hint'));
 const t=lsGet(TAB);if(t==='cop'||t==='map')setTab(t);
 const flush=()=>{saveDraft();persist()};
 window.addEventListener('pagehide',flush);
