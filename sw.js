@@ -1,5 +1,5 @@
 // Registro de Malla: funciona sin conexión. Cambia VERSION al subir cambios.
-const VERSION = 'malla-3';
+const VERSION = 'malla-5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
