@@ -1,5 +1,5 @@
 // Registro de Malla: funciona sin conexión. Cambia VERSION al subir cambios.
-const VERSION = 'malla-9';
+const VERSION = 'malla-11';
 const TILES = 'malla-tiles';
 const TILE_MAX = 4000;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
