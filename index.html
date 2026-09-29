@@ -54,7 +54,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:1000;background:
 .hrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;max-width:760px;margin:0 auto}
 h1{font-size:20px;font-weight:700;margin:0}
 .clock{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-nav{display:grid;grid-template-columns:repeat(3,1fr);max-width:760px;margin:10px auto 0}
+nav{display:grid;grid-template-columns:repeat(4,1fr);max-width:760px;margin:10px auto 0}
 nav button{background:none;border:0;border-bottom:3px solid transparent;padding:8px 2px 9px;font-weight:600;font-size:15px;color:var(--muted);cursor:pointer}
 nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 
@@ -146,6 +146,7 @@ details.fold[open] summary{margin-bottom:8px}
 .sheet{position:fixed;inset:0;z-index:1500;background:rgba(10,14,11,.5);display:flex;align-items:flex-end;justify-content:center}
 .sheet .form{width:100%;max-width:560px;border-radius:14px 14px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));max-height:92%;overflow:auto}
 #sheet{z-index:1700}
+#de-sheet{z-index:1800}
 #pt-sheet{z-index:1600}
 
 /* línea de tiempo */
@@ -229,6 +230,14 @@ html.big .seg label{padding:15px 4px;font-size:16px}
 html.big .chip{padding:9px 14px;font-size:16px}
 html.big nav button{font-size:17px;padding:12px 2px}
 html.big .item .cs{font-size:21px}
+/* partes */
+.docgrid{display:grid;grid-template-columns:1fr;gap:10px}
+.docbtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px 16px;text-align:left;white-space:normal}
+.docbtn b{font-family:var(--mono);font-size:20px;letter-spacing:.04em}
+.docbtn span{font-size:14px;color:var(--muted);font-weight:500}
+.docprev{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;max-height:3.6em;overflow:hidden}
+.dtype{background:var(--accent);color:var(--accent-ink)}
+.docout[hidden]+.note{display:none}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 </style>
 </head>
@@ -240,6 +249,7 @@ html.big .item .cs{font-size:21px}
   <nav role="tablist">
     <button role="tab" data-tab="reg" aria-selected="true">Registro</button>
     <button role="tab" data-tab="map" aria-selected="false">Mapa</button>
+    <button role="tab" data-tab="doc" aria-selected="false">Partes</button>
     <button role="tab" data-tab="cop" aria-selected="false">Ajustes</button>
   </nav>
 </header>
@@ -312,6 +322,19 @@ html.big .item .cs{font-size:21px}
       <span class="h2">Zonas</span>
       <div class="list" id="zone-list" style="margin-top:8px"></div>
     </div>
+  </section>
+
+  <section class="panel" id="tab-doc" hidden>
+    <div class="docgrid">
+      <button class="btn docbtn" type="button" data-doc="SITREP"><b>SITREP</b><span>Informe de situación. Se rellena con lo que ya tiene la app.</span></button>
+      <button class="btn docbtn" type="button" data-doc="SALUTE"><b>SALUTE</b><span>Avistamiento del enemigo. Puede añadirlo al mapa.</span></button>
+      <button class="btn docbtn" type="button" data-doc="MEDEVAC"><b>MEDEVAC</b><span>Petición de evacuación en 9 líneas.</span></button>
+    </div>
+    <div>
+      <span class="h2">Partes guardados</span>
+      <div class="list" id="doc-list" style="margin-top:8px"></div>
+    </div>
+    <div class="actions"><button class="btn" type="button" id="doc-all">Descargar todos en un .txt</button></div>
   </section>
 
   <section class="panel" id="tab-cop" hidden>
@@ -440,8 +463,8 @@ html.big .item .cs{font-size:21px}
       <p class="note"><span class="lnum">L</span>Localización: las coordenadas de arriba · <span class="lnum">T</span>Tiempo: la hora de arriba</p>
       <label for="sa-u"><span><span class="lnum">U</span>Unidad / uniforme / distintivos</span><input type="text" id="sa-u" placeholder="Uniforme boscoso, sin distintivos"></label>
       <label for="sa-e"><span><span class="lnum">E</span>Equipo / armamento</span><input type="text" id="sa-e" placeholder="Armas ligeras, 1 vehículo blindado"></label>
-      <div class="actions"><button class="btn" type="button" id="sa-copy">Copiar parte SALUTE</button></div>
-      <textarea id="sa-out" class="docout" readonly hidden aria-label="Parte SALUTE" style="min-height:170px"></textarea>
+      <div class="actions"><button class="btn" type="button" id="sa-copy">Copiar parte SALUTE</button><button class="btn" type="button" id="sa-txt">Guardar .txt</button></div>
+      <textarea id="sa-out" class="docout" hidden aria-label="Parte SALUTE" style="min-height:170px"></textarea>
     </div>
     <label for="p-note">Nota<textarea id="p-note" placeholder="Qué es, cuántos, dirección, altura…"></textarea></label>
     <div id="p-hist"></div>
@@ -480,6 +503,51 @@ html.big .item .cs{font-size:21px}
   </form>
 </div>
 
+<div class="sheet" id="de-sheet" hidden>
+  <div class="form" role="dialog" aria-label="Editar parte">
+    <div class="tl-head"><span class="h2" id="de-title">Editar parte</span><button class="btn small" type="button" id="de-close">Cerrar</button></div>
+    <textarea id="de-text" style="font-family:var(--mono);font-size:14px;min-height:340px" aria-label="Texto del parte"></textarea>
+    <div class="actions"><button class="btn primary" type="button" id="de-save">Guardar cambios</button><button class="btn" type="button" id="de-copy">Copiar</button><button class="btn" type="button" id="de-txt">Guardar .txt</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="sitrep-sheet" hidden>
+  <form class="form" id="fs" autocomplete="off">
+    <div class="tl-head"><span class="h2">SITREP · Informe de situación</span><button class="btn small" type="button" id="s-close">Cerrar</button></div>
+    <div class="actions"><button class="btn" type="button" id="s-fill">Rellenar con los datos de la app</button><button class="btn" type="button" id="s-clear">Vaciar</button></div>
+    <label for="s-from"><span><span class="lnum">1</span>Periodo desde</span><input type="datetime-local" id="s-from"></label>
+    <label for="s-unit"><span><span class="lnum">2</span>Unidad que informa</span><input type="text" id="s-unit" class="upper" autocapitalize="characters" placeholder="PC · HALCÓN"></label>
+    <label for="s-ene"><span><span class="lnum">3</span>Situación del enemigo</span><textarea id="s-ene" style="min-height:90px"></textarea></label>
+    <label for="s-prop"><span><span class="lnum">4</span>Situación propia</span><textarea id="s-prop" style="min-height:110px"></textarea></label>
+    <label for="s-log"><span><span class="lnum">5</span>Personal y logística</span><textarea id="s-log" placeholder="Bajas, material, combustible, municiones…"></textarea></label>
+    <label for="s-enl"><span><span class="lnum">6</span>Enlace y transmisiones</span><textarea id="s-enl"></textarea></label>
+    <label for="s-int"><span><span class="lnum">7</span>Intenciones y actividades previstas</span><textarea id="s-int"></textarea></label>
+    <label for="s-obs"><span><span class="lnum">8</span>Observaciones</span><textarea id="s-obs"></textarea></label>
+    <div class="actions"><button class="btn primary" type="submit">Generar y guardar</button></div>
+    <textarea id="s-out" class="docout" hidden aria-label="SITREP" style="min-height:260px"></textarea>
+    <p class="note" data-for="s-outbtns">Puedes escribir y corregir el texto de arriba antes de copiarlo o guardarlo.</p>
+    <div class="actions" id="s-outbtns" hidden><button class="btn" type="button" id="s-copy">Copiar</button><button class="btn" type="button" id="s-txt">Guardar .txt</button></div>
+  </form>
+</div>
+
+<div class="sheet" id="salute-sheet" hidden>
+  <form class="form" id="fsa" autocomplete="off">
+    <div class="tl-head"><span class="h2">Parte SALUTE</span><button class="btn small" type="button" id="x-close">Cerrar</button></div>
+    <label for="x-s"><span><span class="lnum">S</span>Tamaño (cuántos)</span><input type="text" id="x-s" placeholder="2 vehículos, 8 personas"></label>
+    <label for="x-a"><span><span class="lnum">A</span>Actividad</span><input type="text" id="x-a" placeholder="Se desplazan hacia el norte"></label>
+    <label for="x-l"><span><span class="lnum">L</span>Localización</span><input type="text" id="x-l" class="upper" placeholder="30T VK 12345 67890" autocapitalize="characters" spellcheck="false"></label>
+    <p class="hint" id="x-hint"></p>
+    <label for="x-u"><span><span class="lnum">U</span>Unidad / uniforme / distintivos</span><input type="text" id="x-u" placeholder="Uniforme boscoso, sin distintivos"></label>
+    <label for="x-t"><span><span class="lnum">T</span>Tiempo (hora del avistamiento)</span><input type="datetime-local" id="x-t"></label>
+    <label for="x-e"><span><span class="lnum">E</span>Equipo / armamento</span><input type="text" id="x-e" placeholder="Armas ligeras, 1 vehículo blindado"></label>
+    <label style="flex-direction:row;align-items:center;gap:10px;font-size:15px;color:var(--ink)"><input type="checkbox" id="x-map" checked> Añadirlo al mapa como enemigo</label>
+    <div class="actions"><button class="btn primary" type="submit">Generar y guardar</button><button class="btn" type="button" id="x-clear">Vaciar</button></div>
+    <textarea id="x-out" class="docout" hidden aria-label="Parte SALUTE" style="min-height:190px"></textarea>
+    <p class="note" data-for="x-outbtns">Puedes escribir y corregir el texto de arriba antes de copiarlo o guardarlo.</p>
+    <div class="actions" id="x-outbtns" hidden><button class="btn" type="button" id="x-copy">Copiar</button><button class="btn" type="button" id="x-txt">Guardar .txt</button></div>
+  </form>
+</div>
+
 <div class="sheet" id="medevac-sheet" hidden>
   <form class="form" id="fm" autocomplete="off">
     <div class="tl-head"><span class="h2">Petición MEDEVAC · 9 líneas</span><button class="btn small" type="button" id="m-close">Cerrar</button></div>
@@ -494,21 +562,25 @@ html.big .item .cs{font-size:21px}
         <label for="m3c">C · Prioritario<input type="number" id="m3c" min="0" inputmode="numeric" placeholder="0"></label>
         <label for="m3d">D · Rutina<input type="number" id="m3d" min="0" inputmode="numeric" placeholder="0"></label>
         <label for="m3e">E · Conveniencia<input type="number" id="m3e" min="0" inputmode="numeric" placeholder="0"></label>
-      </div></div>
-    <label for="m4"><span><span class="lnum">4</span>Equipo especial</span><select id="m4"><option value="A">A · Ninguno</option><option value="B">B · Grúa / torno</option><option value="C">C · Equipo de extracción</option><option value="D">D · Ventilador</option></select></label>
+      </div>
+      <label for="m3t" style="margin-top:8px">O escríbela tú<input type="text" id="m3t" placeholder="2 urgentes, 1 prioritario"></label></div>
+    <label for="m4"><span><span class="lnum">4</span>Equipo especial</span><input type="text" id="m4" list="dl-m4" placeholder="A · Ninguno"><datalist id="dl-m4"><option value="A · Ninguno"><option value="B · Grúa / torno"><option value="C · Equipo de extracción"><option value="D · Ventilador"></datalist></label>
     <div><span class="h2" style="display:block;margin-bottom:6px"><span class="lnum">5</span>Pacientes por tipo</span>
       <div class="m-grid">
         <label for="m5l">L · En camilla<input type="number" id="m5l" min="0" inputmode="numeric" placeholder="0"></label>
         <label for="m5a">A · Ambulantes<input type="number" id="m5a" min="0" inputmode="numeric" placeholder="0"></label>
-      </div></div>
-    <label for="m6"><span><span class="lnum">6</span>Seguridad en la zona de recogida</span><select id="m6"><option value="N">N · Sin enemigo en la zona</option><option value="P">P · Posible enemigo</option><option value="E">E · Enemigo en la zona (precaución)</option><option value="X">X · Enemigo en la zona (escolta armada)</option></select></label>
-    <label for="m7"><span><span class="lnum">7</span>Señalización de la zona</span><select id="m7"><option value="A">A · Paneles</option><option value="B">B · Pirotecnia</option><option value="C">C · Humo</option><option value="D">D · Ninguna</option><option value="E">E · Otra</option></select></label>
+      </div>
+      <label for="m5t" style="margin-top:8px">O escríbela tú<input type="text" id="m5t" placeholder="1 en camilla, 2 andando"></label></div>
+    <label for="m6"><span><span class="lnum">6</span>Seguridad en la zona de recogida</span><input type="text" id="m6" list="dl-m6" placeholder="N · Sin enemigo en la zona"><datalist id="dl-m6"><option value="N · Sin enemigo en la zona"><option value="P · Posible enemigo"><option value="E · Enemigo en la zona (precaución)"><option value="X · Enemigo en la zona (escolta armada)"></datalist></label>
+    <label for="m7"><span><span class="lnum">7</span>Señalización de la zona</span><input type="text" id="m7" list="dl-m7" placeholder="C · Humo"><datalist id="dl-m7"><option value="A · Paneles"><option value="B · Pirotecnia"><option value="C · Humo"><option value="D · Ninguna"><option value="E · Otra"></datalist></label>
     <label for="m7t">Detalle de la señalización (color, tipo)<input type="text" id="m7t" placeholder="Humo verde"></label>
-    <label for="m8"><span><span class="lnum">8</span>Nacionalidad y estatus</span><select id="m8"><option value="A">A · Militar propio</option><option value="B">B · Civil propio</option><option value="C">C · Militar no propio</option><option value="D">D · Civil no propio</option><option value="E">E · Prisionero de guerra</option></select></label>
+    <label for="m8"><span><span class="lnum">8</span>Nacionalidad y estatus</span><input type="text" id="m8" list="dl-m8" placeholder="A · Militar propio"><datalist id="dl-m8"><option value="A · Militar propio"><option value="B · Civil propio"><option value="C · Militar no propio"><option value="D · Civil no propio"><option value="E · Prisionero de guerra"></datalist></label>
     <label for="m9"><span><span class="lnum">9</span>Contaminación NBQ / descripción del terreno</span><input type="text" id="m9" placeholder="Sin contaminación · claro llano al norte del camino"></label>
     <label for="m-obs">Observaciones<textarea id="m-obs" placeholder="Lesiones, estado, datos del contacto…"></textarea></label>
     <div class="actions"><button class="btn primary" type="submit">Generar y copiar</button><button class="btn" type="button" id="m-clear">Vaciar</button></div>
-    <textarea id="m-out" class="docout" readonly hidden aria-label="Petición MEDEVAC"></textarea>
+    <textarea id="m-out" class="docout" hidden aria-label="Petición MEDEVAC"></textarea>
+    <p class="note" data-for="m-outbtns">Puedes escribir y corregir el texto de arriba antes de copiarlo o guardarlo.</p>
+    <div class="actions" id="m-outbtns" hidden><button class="btn" type="button" id="m-copy2">Copiar</button><button class="btn" type="button" id="m-txt">Guardar .txt</button></div>
     <div id="m-hist"></div>
   </form>
 </div>
@@ -1284,7 +1356,7 @@ const GEO=(()=>{
   return{parse,toMGRS,toUTM,fromUTM,zoneOf,dist,bearing};
 })();
 
-const VERSION='10 · 29/09/2026';
+const VERSION='12 · 29/09/2026';
 const KEY='malla-v2',DRAFT='malla-v2-draft',BK='malla-v2-backups',TAB='malla-v2-tab';
 const COLORS=['verde','amarillo','azul','rojo','morado','gris'];
 const DEF_ST=[{id:'M',n:'MOV',c:'amarillo',k:'movimiento, regreso a base, en marcha'},{id:'I',n:'INSTR',c:'azul',k:'instrucción, instruccion'},{id:'F',n:'LFX',c:'rojo',k:'ejercicio de fuego, lfx, fuego real'}];
@@ -1454,7 +1526,7 @@ $('#st-list').addEventListener('click',e=>{const b=e.target.closest('[data-del]'
 $('#st-add').addEventListener('click',()=>{const used=S.st.map(s=>s.c);S.st.push({id:'x'+uid(),n:'NUEVO',c:COLORS.find(c=>!used.includes(c))||'gris',k:''});renderStates();renderSegs();save('Estado añadido');const ins=$('#st-list').querySelectorAll('input[data-f=n]');const last=ins[ins.length-1];last.focus();last.select()});
 
 /* pestañas */
-function setTab(t){document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));$('#tab-reg').hidden=t!=='reg';$('#tab-map').hidden=t!=='map';$('#tab-cop').hidden=t!=='cop';lsSet(TAB,t);window.scrollTo(0,0);if(t==='map')renderMap()}
+function setTab(t){document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));$('#tab-reg').hidden=t!=='reg';$('#tab-map').hidden=t!=='map';$('#tab-doc').hidden=t!=='doc';$('#tab-cop').hidden=t!=='cop';lsSet(TAB,t);window.scrollTo(0,0);if(t==='map')renderMap();if(t==='doc')renderDocs()}
 document.querySelector('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab)});
 
 /* formulario */
@@ -1565,7 +1637,8 @@ async function download(name,text){
   await dlReady;
   if(dl){try{await dl.save({filename:name,data:text});toast('Archivo guardado')}catch(e){if(!e||e.code!=='declined')toast('No se pudo descargar: usa Copiar')}return}
   if(window.claude){toast('Descarga no disponible aquí: usa Copiar');return}
-  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text]));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}catch(e){toast('No se pudo descargar: usa Copiar')}
+  try{const f=new File([text],name,{type:'text/plain'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}catch(e){toast('No se pudo descargar: usa Copiar')}
 }
 $('#exp-copy').addEventListener('click',()=>copyFrom($('#exp-out')));
 $('#exp-dl').addEventListener('click',()=>download(expName,$('#exp-out').value));
@@ -1609,7 +1682,7 @@ function openPoint(id){
   $('#p-t').value=toLocal(new Date());$('#p-coord').value=last?last.coord||'':'';$('#p-note').value=last?last.note||'':'';
   coordHint($('#p-coord'),$('#p-hint'));
   $('#p-hist').innerHTML=p&&p.hist.length?`<span class="h2">Historial</span><div class="tl-list" style="margin-top:6px">${[...p.hist].map(h=>`<div class="ev k-${p.kind}" style="--dot:var(--k);cursor:default"><div class="l1"><span class="hh">${hm(h.t)}</span><span class="nums">${dayLabel(h.t)==='Hoy'?'':dayLabel(h.t)}</span></div>${posHTML(h)}${h.note?`<div>${esc(h.note)}</div>`:''}</div>`).join('')}</div>`:'';
-  const sa=(last&&last.salute)||{};['s','a','u','e'].forEach(k=>$('#sa-'+k).value=sa[k]||'');$('#sa-out').hidden=true;
+  const sa=(last&&last.salute)||{};['s','a','u','e'].forEach(k=>$('#sa-'+k).value=sa[k]||'');$('#sa-out').hidden=true;delete $('#sa-out').dataset.did;
   $('#p-close').hidden=!p;
   $('#pt-sheet').hidden=false;
 }
@@ -1910,15 +1983,16 @@ function saluteText(){
   const v=k=>$('#sa-'+k).value.trim()||'—';
   return `PARTE SALUTE — ${$('#p-name').value.trim().toUpperCase()}\nS (Tamaño): ${v('s')}\nA (Actividad): ${v('a')}\nL (Localización): ${g?GEO.toMGRS(g.lat,g.lon):($('#p-coord').value.trim()||'—')}\nU (Unidad/uniforme): ${v('u')}\nT (Tiempo): ${dtg(t)}\nE (Equipo): ${v('e')}`+($('#p-note').value.trim()?`\nObservaciones: ${$('#p-note').value.trim()}`:'');
 }
-$('#sa-copy').addEventListener('click',()=>{const ta=$('#sa-out');ta.value=saluteText();ta.hidden=false;copyFrom(ta);S.docs.push({id:uid(),t:new Date().toISOString(),type:'SALUTE',text:ta.value});persist()});
+$('#sa-txt').addEventListener('click',()=>{const ta=$('#sa-out');if(!ta.dataset.did||ta.hidden){ta.value=saluteText();ta.dataset.did=addDoc('SALUTE',ta.value).id;ta.hidden=false;persist()}download('SALUTE-'+dtg(new Date().toISOString())+'.txt',ta.value)});
+$('#sa-copy').addEventListener('click',()=>{const ta=$('#sa-out');if(!ta.dataset.did||ta.hidden){ta.value=saluteText();ta.dataset.did=addDoc('SALUTE',ta.value).id}ta.hidden=false;copyFrom(ta);persist()});
 
 /* MEDEVAC 9 líneas */
-const M_IDS=['m1','m2','m3a','m3b','m3c','m3d','m3e','m4','m5l','m5a','m6','m7','m7t','m8','m9','m-obs'];
+const M_IDS=['m1','m2','m3a','m3b','m3c','m3d','m3e','m3t','m4','m5l','m5a','m5t','m6','m7','m7t','m8','m9','m-obs'];
 function openMedevac(){
   const{units,pts,pc}=mapItems();
   $('#m1-from').innerHTML='<option value="">— elegir —</option>'+(pc?`<option value="${esc(pc.coord)}">Puesto de mando</option>`:'')+[...units,...pts].map(it=>`<option value="${esc(it.pos.coord)}">${esc(it.name)} · ${esc(it.pos.coord)}</option>`).join('');
   const d=parse(lsGet('malla-medevac-draft'),null);if(d)M_IDS.forEach(k=>{if(d[k]!=null)$('#'+k).value=d[k]});
-  coordHint($('#m1'),$('#m1-hint'));renderMHist();$('#m-out').hidden=true;$('#medevac-sheet').hidden=false;
+  coordHint($('#m1'),$('#m1-hint'));renderMHist();$('#m-out').hidden=true;$('#m-outbtns').hidden=true;$('#medevac-sheet').hidden=false;
 }
 function mDraft(){const d={};M_IDS.forEach(k=>d[k]=$('#'+k).value);lsSet('malla-medevac-draft',JSON.stringify(d))}
 $('#fm').addEventListener('input',mDraft);$('#fm').addEventListener('change',mDraft);
@@ -1927,26 +2001,110 @@ $('#m1-from').addEventListener('change',()=>{if($('#m1-from').value){$('#m1').va
 $('#medevac-btn').addEventListener('click',openMedevac);
 $('#m-close').addEventListener('click',()=>{$('#medevac-sheet').hidden=true});
 $('#m-clear').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar',()=>{M_IDS.forEach(k=>{const el=$('#'+k);el.tagName==='SELECT'?el.selectedIndex=0:el.value=''});mDraft();$('#m1-hint').textContent='';$('#m-out').hidden=true}));
-const selTxt=id=>{const el=$('#'+id);return el.options[el.selectedIndex].text.replace(' · ',' (')+')'};
+const selTxt=id=>{const v=$('#'+id).value.trim();if(!v)return'—';const m=v.match(/^([A-Z]) · (.*)$/);return m?m[1]+' ('+m[2]+')':v};
 function medevacText(){
   const g=GEO.parse($('#m1').value||''),n=id=>+$('#'+id).value||0;
   const prec=[['A','urgente','m3a'],['B','urgente quirúrgico','m3b'],['C','prioritario','m3c'],['D','rutina','m3d'],['E','conveniencia','m3e']].filter(x=>n(x[2])).map(x=>`${x[0]}-${n(x[2])} (${x[1]})`).join(', ')||'—';
+  const precT=$('#m3t').value.trim(),tipoT=$('#m5t').value.trim();
   const tipo=[['L','camilla','m5l'],['A','ambulantes','m5a']].filter(x=>n(x[2])).map(x=>`${x[0]}-${n(x[2])} (${x[1]})`).join(', ')||'—';
   return [`MEDEVAC 9 LÍNEAS — ${dtg(new Date().toISOString())}`,
     `L1 Localización: ${g?GEO.toMGRS(g.lat,g.lon):($('#m1').value.trim()||'—')}`,
     `L2 Frecuencia / indicativo: ${$('#m2').value.trim()||'—'}`,
-    `L3 Pacientes por precedencia: ${prec}`,
+    `L3 Pacientes por precedencia: ${precT||prec}`,
     `L4 Equipo especial: ${selTxt('m4')}`,
-    `L5 Pacientes por tipo: ${tipo}`,
+    `L5 Pacientes por tipo: ${tipoT||tipo}`,
     `L6 Seguridad en la zona: ${selTxt('m6')}`,
     `L7 Señalización: ${selTxt('m7')}${$('#m7t').value.trim()?' — '+$('#m7t').value.trim():''}`,
     `L8 Nacionalidad y estatus: ${selTxt('m8')}`,
     `L9 NBQ / terreno: ${$('#m9').value.trim()||'—'}`]
     .concat($('#m-obs').value.trim()?['Observaciones: '+$('#m-obs').value.trim()]:[]).join('\n');
 }
-$('#fm').addEventListener('submit',e=>{e.preventDefault();const ta=$('#m-out');ta.value=medevacText();ta.hidden=false;copyFrom(ta);S.docs.push({id:uid(),t:new Date().toISOString(),type:'MEDEVAC',text:ta.value});save('MEDEVAC copiada y guardada');renderMHist()});
+$('#fm').addEventListener('submit',e=>{e.preventDefault();const ta=$('#m-out');ta.value=medevacText();ta.hidden=false;$('#m-outbtns').hidden=false;copyFrom(ta);ta.dataset.did=addDoc('MEDEVAC',ta.value).id;save('MEDEVAC copiada y guardada');renderMHist()});
 function renderMHist(){const d=S.docs.filter(x=>x.type==='MEDEVAC').slice(-5).reverse();$('#m-hist').innerHTML=d.length?`<span class="h2" style="display:block;margin:6px 0">Últimas peticiones</span><div class="list">${d.map(x=>`<div class="item"><span class="badge c-rojo">9L</span><div class="top"><span class="t">${dtg(x.t)}</span></div><div class="nums">${esc(x.text.split('\n')[1]||'')}</div><div class="side"><button class="btn small" type="button" data-mcopy="${x.id}">Copiar</button></div></div>`).join('')}</div>`:''}
 $('#m-hist').addEventListener('click',e=>{const b=e.target.closest('[data-mcopy]');if(!b)return;const x=S.docs.find(d=>d.id===b.dataset.mcopy);if(x){const ta=$('#m-out');ta.value=x.text;ta.hidden=false;copyFrom(ta)}});
+
+$('#m-copy2').addEventListener('click',()=>copyFrom($('#m-out')));
+$('#m-txt').addEventListener('click',()=>download('MEDEVAC-'+dtg(new Date().toISOString())+'.txt',$('#m-out').value));
+
+/* pestaña Partes */
+const DOCNAME={SITREP:'SITREP',SALUTE:'SALUTE',MEDEVAC:'MEDEVAC'};
+function docFile(d){return d.type+'-'+dtg(d.t)+'.txt'}
+function renderDocs(){
+  const ds=[...S.docs].sort((a,b)=>a.t<b.t?1:-1);
+  $('#doc-list').innerHTML=ds.map(d=>`<div class="item" data-did="${d.id}"><span class="badge dtype">${esc(d.type)}</span><div class="top"><span class="t">${dtg(d.t)}</span></div><div class="docprev">${esc(d.text.split('\n').slice(1,3).join('\n'))}</div><div class="side stack"><button class="btn small" type="button" data-da="edit">Editar</button><button class="btn small" type="button" data-da="copy">Copiar</button><button class="btn small" type="button" data-da="txt">.txt</button><button class="btn small danger" type="button" data-da="del">Borrar</button></div></div>`).join('')||'<div class="empty">Aún no hay partes. Los que generes aquí, en el mapa o en MEDEVAC se guardan en esta lista.</div>';
+  $('#doc-all').hidden=!ds.length;
+}
+let clipTA=null;function copyText(t){if(!clipTA){clipTA=document.createElement('textarea');clipTA.style.cssText='position:fixed;left:-9999px;top:0';clipTA.setAttribute('readonly','');document.body.appendChild(clipTA)}clipTA.value=t;copyFrom(clipTA)}
+$('#doc-list').addEventListener('click',e=>{const b=e.target.closest('[data-da]');if(!b)return;const d=S.docs.find(x=>x.id===b.closest('.item').dataset.did);if(!d)return;
+  if(b.dataset.da==='edit')openDocEdit(d);
+  if(b.dataset.da==='copy')copyText(d.text);
+  if(b.dataset.da==='txt')download(docFile(d),d.text);
+  if(b.dataset.da==='del')confirmTap(b,'Confirmar',()=>{S.docs=S.docs.filter(x=>x.id!==d.id);save('Parte borrado');renderDocs()});
+});
+$('#doc-all').addEventListener('click',()=>{const ds=[...S.docs].sort((a,b)=>a.t<b.t?-1:1);if(!ds.length)return;download('PARTES-'+dtg(new Date().toISOString())+'.txt',ds.map(d=>d.text).join('\n\n----------------------------------------\n\n'))});
+document.querySelector('.docgrid').addEventListener('click',e=>{const b=e.target.closest('[data-doc]');if(!b)return;const k=b.dataset.doc;if(k==='SITREP')openSitrep();else if(k==='SALUTE')openSalute();else openMedevac()});
+function addDoc(type,text){const d={id:uid(),t:new Date().toISOString(),type,text};S.docs.push(d);return d}
+let docT;
+document.addEventListener('input',e=>{const ta=e.target;if(!ta.classList||!ta.classList.contains('docout')||!ta.dataset.did)return;const d=S.docs.find(x=>x.id===ta.dataset.did);if(!d)return;d.text=ta.value;d.edited=new Date().toISOString();clearTimeout(docT);docT=setTimeout(()=>{persist();if(!$('#tab-doc').hidden)renderDocs()},500)});
+/* editar un parte guardado */
+let deId=null;
+function openDocEdit(d){deId=d.id;$('#de-title').textContent='Editar '+d.type+' · '+dtg(d.t);$('#de-text').value=d.text;$('#de-sheet').hidden=false;setTimeout(()=>$('#de-text').focus(),50)}
+$('#de-close').addEventListener('click',()=>{$('#de-sheet').hidden=true;deId=null});
+$('#de-save').addEventListener('click',()=>{const d=S.docs.find(x=>x.id===deId);if(d){d.text=$('#de-text').value;d.edited=new Date().toISOString()}$('#de-sheet').hidden=true;deId=null;save('Parte guardado');renderDocs()});
+$('#de-copy').addEventListener('click',()=>copyFrom($('#de-text')));
+$('#de-txt').addEventListener('click',()=>{const d=S.docs.find(x=>x.id===deId);download(d?docFile(d):'PARTE.txt',$('#de-text').value)});
+
+/* SITREP */
+const S_IDS=['s-from','s-unit','s-ene','s-prop','s-log','s-enl','s-int','s-obs'];
+function sDraft(){const d={};S_IDS.forEach(k=>d[k]=$('#'+k).value);lsSet('malla-sitrep-draft',JSON.stringify(d))}
+function openSitrep(){const d=parse(lsGet('malla-sitrep-draft'),null);if(d)S_IDS.forEach(k=>{if(d[k]!=null)$('#'+k).value=d[k]});
+  if(!$('#s-from').value){const f=lsGet('malla-relevo');$('#s-from').value=toLocal(f?new Date(f):new Date(Date.now()-8*36e5))}
+  if(!$('#s-unit').value)$('#s-unit').value=lsGet('malla-unit')||'';
+  $('#s-out').hidden=true;$('#s-outbtns').hidden=true;$('#sitrep-sheet').hidden=false}
+function sitrepAuto(){
+  LB=labels();const from=new Date(fromLocal($('#s-from').value)||Date.now()-8*36e5);
+  const groups=Object.values(byCs()),inG=groups.filter(g=>g[g.length-1].tipo!=='S');
+  const ene=S.pts.filter(p=>!p.closed&&p.kind==='enemigo').map(p=>{const h=p.hist[p.hist.length-1],tr=p.hist.filter(x=>x.lat!=null),mt=motionTxt(motion(tr)),sa=h.salute||{};return `- ${p.name} · ${h.coord||'sin coordenadas'} · ${dtg(h.t)}${sa.s?' · '+sa.s:''}${sa.a?' · '+sa.a:''}${h.note?' · '+h.note:''}${mt?' · '+mt:''}`});
+  const uav=S.pts.filter(p=>!p.closed&&p.kind==='dron').map(p=>{const h=p.hist[p.hist.length-1];return `- ${p.name} (${p.air==='plane'?'ala fija':'multirrotor'}) · ${h.coord||'sin coordenadas'} · ${hm(h.t)}${h.note?' · '+h.note:''}`});
+  const tv=inG.reduce((s,g)=>s+(g[g.length-1].veh||0),0),tp=inG.reduce((s,g)=>s+(g[g.length-1].pax||0),0);
+  const prop=inG.map(g=>{const l=g[g.length-1],p=[...g].reverse().find(r=>r.coord),z=p&&p.lat!=null?zonesAt(p):[];return `- ${l.cs}${planDesc(l.cs)?' ('+planDesc(l.cs)+')':''} · ${LB[l.id]?LB[l.id].txt:stName(l.tipo)} desde ${hm(l.t)}${l.veh!=null?' · '+l.veh+' veh':''}${l.pax!=null?' · '+l.pax+' pax':''}${l.zona?' · '+l.zona:''}${p?' · '+p.coord:''}${z.length?' · en '+z.join(', '):''}${l.acc?' — '+l.acc:''}`});
+  const out=groups.filter(g=>g[g.length-1].tipo==='S'&&new Date(g[g.length-1].t)>=from).map(g=>g[g.length-1].cs+' ('+hm(g[g.length-1].t)+')');
+  $('#s-ene').value=(ene.length?ene.join('\n'):'Sin contacto con el enemigo.')+(uav.length?'\nMedios aéreos propios:\n'+uav.join('\n'):'');
+  $('#s-prop').value=`En malla: ${inG.length} · ${tv} veh · ${tp} pax`+(pcPos()?`\nPC en ${S.pc.coord}`:'')+(prop.length?'\n'+prop.join('\n'):'')+(out.length?'\nSalieron de malla: '+out.join(', '):'');
+  const sc=inG.filter(g=>contact(g).level).map(g=>g[g.length-1].cs+' ('+dur(contact(g).ms)+')');
+  const rcs=S.recs.filter(r=>r.rc&&new Date(r.t)>=from).sort((a,b)=>a.t<b.t?1:-1);const lastRc={};rcs.forEach(r=>{if(!lastRc[r.cs])lastRc[r.cs]=r});
+  $('#s-enl').value=(sc.length?'Sin contacto: '+sc.join(', '):'Enlace con todas las estaciones en malla.')+(Object.keys(lastRc).length?'\nÚltimos radiochecks: '+Object.values(lastRc).map(r=>r.cs+' '+(r.rc==='SC'?'sin contacto':r.rc)+' ('+hm(r.t)+')').join(', '):'');
+  const mev=S.docs.filter(d=>d.type==='MEDEVAC'&&new Date(d.t)>=from).length;
+  if(mev&&!$('#s-log').value.trim())$('#s-log').value=`${mev} petición(es) MEDEVAC en el periodo.`;
+  sDraft();toast('Rellenado. Revisa y completa lo que falte');
+}
+function sitrepText(){const v=id=>$('#'+id).value.trim()||'Sin novedad.';const from=fromLocal($('#s-from').value);const now=new Date().toISOString();
+  return [`SITREP — ${dtg(now)}`,`1. PERIODO: ${from?dtg(from):'—'} a ${dtg(now)}`,`2. UNIDAD QUE INFORMA: ${$('#s-unit').value.trim().toUpperCase()||'—'}`,'',`3. SITUACIÓN DEL ENEMIGO:\n${v('s-ene')}`,'',`4. SITUACIÓN PROPIA:\n${v('s-prop')}`,'',`5. PERSONAL Y LOGÍSTICA:\n${v('s-log')}`,'',`6. ENLACE Y TRANSMISIONES:\n${v('s-enl')}`,'',`7. INTENCIONES Y ACTIVIDADES PREVISTAS:\n${v('s-int')}`,'',`8. OBSERVACIONES:\n${v('s-obs')}`].join('\n')}
+$('#fs').addEventListener('input',sDraft);
+$('#s-unit').addEventListener('change',()=>lsSet('malla-unit',$('#s-unit').value.trim().toUpperCase()));
+$('#s-fill').addEventListener('click',sitrepAuto);
+$('#s-close').addEventListener('click',()=>{$('#sitrep-sheet').hidden=true});
+$('#s-clear').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar',()=>{S_IDS.forEach(k=>{if(k!=='s-unit')$('#'+k).value=''});sDraft();$('#s-out').hidden=true;$('#s-outbtns').hidden=true}));
+$('#fs').addEventListener('submit',e=>{e.preventDefault();const t=sitrepText();$('#s-out').value=t;$('#s-out').hidden=false;$('#s-outbtns').hidden=false;$('#s-out').dataset.did=addDoc('SITREP',t).id;save('SITREP guardado');renderDocs();$('#s-out').scrollIntoView({block:'nearest'})});
+$('#s-copy').addEventListener('click',()=>copyFrom($('#s-out')));
+$('#s-txt').addEventListener('click',()=>download('SITREP-'+dtg(new Date().toISOString())+'.txt',$('#s-out').value));
+
+/* SALUTE (desde Partes) */
+const X_IDS=['x-s','x-a','x-l','x-u','x-e'];
+function openSalute(){const d=parse(lsGet('malla-salute-draft'),null);if(d)X_IDS.forEach(k=>{if(d[k]!=null)$('#'+k).value=d[k]});$('#x-t').value=toLocal(new Date());coordHint($('#x-l'),$('#x-hint'));$('#x-out').hidden=true;$('#x-outbtns').hidden=true;$('#salute-sheet').hidden=false}
+function xDraft(){const d={};X_IDS.forEach(k=>d[k]=$('#'+k).value);lsSet('malla-salute-draft',JSON.stringify(d))}
+$('#fsa').addEventListener('input',xDraft);
+$('#x-l').addEventListener('input',()=>coordHint($('#x-l'),$('#x-hint')));
+$('#x-close').addEventListener('click',()=>{$('#salute-sheet').hidden=true});
+$('#x-clear').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar',()=>{X_IDS.forEach(k=>$('#'+k).value='');xDraft();$('#x-hint').textContent='';$('#x-out').hidden=true;$('#x-outbtns').hidden=true}));
+$('#fsa').addEventListener('submit',e=>{e.preventDefault();
+  const v=id=>$('#'+id).value.trim(),t=fromLocal($('#x-t').value)||new Date().toISOString(),g=GEO.parse(v('x-l'));
+  let name='ENEMIGO';
+  if($('#x-map').checked){const h={t,note:[v('x-s'),v('x-a')].filter(Boolean).join(' · '),salute:{s:v('x-s'),a:v('x-a'),u:v('x-u'),e:v('x-e')}};applyCoord(h,v('x-l'));const p={id:uid(),kind:'enemigo',name:nextName('enemigo'),hist:[h],closed:false};S.pts.push(p);name=p.name}
+  const txt=[`PARTE SALUTE${$('#x-map').checked?' — '+name:''}`,`S (Tamaño): ${v('x-s')||'—'}`,`A (Actividad): ${v('x-a')||'—'}`,`L (Localización): ${g?GEO.toMGRS(g.lat,g.lon):(v('x-l')||'—')}`,`U (Unidad/uniforme): ${v('x-u')||'—'}`,`T (Tiempo): ${dtg(t)}`,`E (Equipo): ${v('x-e')||'—'}`].join('\n');
+  $('#x-out').value=txt;$('#x-out').hidden=false;$('#x-outbtns').hidden=false;$('#x-out').dataset.did=addDoc('SALUTE',txt).id;fitReal=true;save('SALUTE guardado'+($('#x-map').checked?' y '+name+' añadido al mapa':''));renderDocs();$('#x-out').scrollIntoView({block:'nearest'})});
+$('#x-copy').addEventListener('click',()=>copyFrom($('#x-out')));
+$('#x-txt').addEventListener('click',()=>download('SALUTE-'+dtg(new Date().toISOString())+'.txt',$('#x-out').value));
 
 /* avisos y pantalla */
 function initCfg(){$('#cfg-warn').value=S.cfg.warn;$('#cfg-crit').value=S.cfg.crit}
@@ -1966,7 +2124,7 @@ setInterval(tick,15000);
 setInterval(()=>{if(document.activeElement===$('#q'))return;render()},60000);
 $('#ver').textContent='Versión '+VERSION;
 applyUI();initCfg();renderPlan();renderSegs();loadDraft();renderStates();initPC();persist();render();tick();coordHint($('#coord'),$('#coord-hint'));
-const t=lsGet(TAB);if(t==='cop'||t==='map')setTab(t);
+const t=lsGet(TAB);if(t==='cop'||t==='map'||t==='doc')setTab(t);
 const flush=()=>{saveDraft();persist()};
 window.addEventListener('pagehide',flush);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
