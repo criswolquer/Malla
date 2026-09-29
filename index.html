@@ -193,6 +193,16 @@ details.fold[open] summary{margin-bottom:8px}
 .leaflet-tooltip.lf-lbl{font:600 12px var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:none;padding:1px 5px}
 .leaflet-tooltip.lf-lbl::before{display:none}
 .leaflet-control-layers{font:14px var(--sans)}
+/* plan de comunicaciones */
+.plan-chip{font-family:var(--mono);font-weight:600}
+.plan-chip.fuera{border-style:dashed;color:var(--muted)}
+.plan-desc{font-size:12px;color:var(--muted);font-family:var(--sans);font-weight:400}
+.planrow{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) auto;gap:8px;align-items:end;padding:10px 0;border-top:1px solid var(--line)}
+.planrow:first-child{border-top:0}
+.planrow .nums2{grid-column:1/3;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.docout{font-family:var(--mono);font-size:13px;min-height:220px}
+.m-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.lnum{font-family:var(--mono);color:var(--accent);font-weight:700;margin-right:4px}
 /* sin contacto */
 .card.warn{box-shadow:inset 5px 0 0 var(--mov)} .card.crit{box-shadow:inset 5px 0 0 var(--fire)}
 .nc{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em}
@@ -239,6 +249,7 @@ html.big .item .cs{font-size:21px}
 
   <section class="panel" id="tab-reg">
     <form class="form" id="f" autocomplete="off">
+      <div id="plan-box" hidden><span class="h2" style="display:block;margin-bottom:6px">Plan de comunicaciones</span><div class="chips" id="plan-chips"></div></div>
       <div class="seg" id="seg-f" role="radiogroup" aria-label="Estado"></div>
       <div class="row cs-t">
         <label for="cs">Indicativo<input type="text" id="cs" class="upper" list="l-cs" placeholder="HALCÓN 21" autocapitalize="characters"></label>
@@ -259,7 +270,8 @@ html.big .item .cs{font-size:21px}
     </form>
 
     <div class="sumbar" id="sum"></div>
-    <div class="actions"><button class="btn" type="button" id="relevo-btn">Resumen de relevo</button></div>
+    <p class="note" id="plan-missing" hidden></p>
+    <div class="actions"><button class="btn" type="button" id="relevo-btn">Resumen de relevo</button><button class="btn" type="button" id="medevac-btn">MEDEVAC 9 líneas</button></div>
     <input type="search" id="q" placeholder="Buscar indicativo, zona, acción…" aria-label="Buscar">
     <div>
       <span class="h2">En malla</span>
@@ -309,6 +321,13 @@ html.big .item .cs{font-size:21px}
       <label for="pc-coord">Coordenadas del puesto<input type="text" id="pc-coord" class="upper" placeholder="30T VK 12345 67890" autocapitalize="characters" spellcheck="false"></label>
       <p class="hint" id="pc-hint"></p>
       <div class="actions"><button class="btn" type="button" id="pc-save">Guardar posición</button><button class="btn" type="button" id="pc-gps">Usar mi ubicación</button></div>
+    </div>
+
+    <div class="form">
+      <span class="h2">Plan de comunicaciones</span>
+      <p class="note">Los indicativos de tu malla. Salen como botones encima del formulario: un toque y se rellena. Los que aún no han entrado se marcan con borde discontinuo.</p>
+      <div id="plan-list"></div>
+      <div class="actions"><button class="btn" type="button" id="plan-add">Añadir indicativo</button></div>
     </div>
 
     <div class="form">
@@ -414,6 +433,16 @@ html.big .item .cs{font-size:21px}
     </div>
     <label for="p-coord">Coordenadas<input type="text" id="p-coord" class="upper" placeholder="30T VK 12345 67890" autocapitalize="characters" spellcheck="false"></label>
     <p class="hint" id="p-hint"></p>
+    <div id="salute" hidden style="display:flex;flex-direction:column;gap:10px">
+      <span class="h2">Parte SALUTE</span>
+      <label for="sa-s"><span><span class="lnum">S</span>Tamaño (cuántos)</span><input type="text" id="sa-s" placeholder="2 vehículos, 8 personas"></label>
+      <label for="sa-a"><span><span class="lnum">A</span>Actividad</span><input type="text" id="sa-a" placeholder="Se desplazan hacia el norte"></label>
+      <p class="note"><span class="lnum">L</span>Localización: las coordenadas de arriba · <span class="lnum">T</span>Tiempo: la hora de arriba</p>
+      <label for="sa-u"><span><span class="lnum">U</span>Unidad / uniforme / distintivos</span><input type="text" id="sa-u" placeholder="Uniforme boscoso, sin distintivos"></label>
+      <label for="sa-e"><span><span class="lnum">E</span>Equipo / armamento</span><input type="text" id="sa-e" placeholder="Armas ligeras, 1 vehículo blindado"></label>
+      <div class="actions"><button class="btn" type="button" id="sa-copy">Copiar parte SALUTE</button></div>
+      <textarea id="sa-out" class="docout" readonly hidden aria-label="Parte SALUTE" style="min-height:170px"></textarea>
+    </div>
     <label for="p-note">Nota<textarea id="p-note" placeholder="Qué es, cuántos, dirección, altura…"></textarea></label>
     <div id="p-hist"></div>
     <div class="actions"><button class="btn primary" type="submit">Guardar</button><button class="btn" type="button" id="p-cancel">Cancelar</button><button class="btn danger" type="button" id="p-close" hidden>Quitar del mapa</button></div>
@@ -448,6 +477,39 @@ html.big .item .cs{font-size:21px}
     <label for="z-name">Nombre<input type="text" id="z-name" class="upper" autocapitalize="characters" placeholder="CAMPO DE TIRO 1"></label>
     <label for="z-color">Color<select id="z-color"><option value="rojo">rojo</option><option value="amarillo">amarillo</option><option value="azul">azul</option><option value="verde">verde</option><option value="morado">morado</option><option value="gris">gris</option></select></label>
     <div class="actions"><button class="btn primary" type="submit">Guardar zona</button><button class="btn" type="button" id="z-cancel">Cancelar</button></div>
+  </form>
+</div>
+
+<div class="sheet" id="medevac-sheet" hidden>
+  <form class="form" id="fm" autocomplete="off">
+    <div class="tl-head"><span class="h2">Petición MEDEVAC · 9 líneas</span><button class="btn small" type="button" id="m-close">Cerrar</button></div>
+    <label for="m1"><span><span class="lnum">1</span>Localización de la zona de recogida</span><input type="text" id="m1" class="upper" placeholder="30T VK 12345 67890" autocapitalize="characters" spellcheck="false"></label>
+    <label for="m1-from">Usar la posición de…<select id="m1-from"></select></label>
+    <p class="hint" id="m1-hint"></p>
+    <label for="m2"><span><span class="lnum">2</span>Frecuencia, indicativo y sufijo</span><input type="text" id="m2" placeholder="45.550 · HALCÓN 21"></label>
+    <div><span class="h2" style="display:block;margin-bottom:6px"><span class="lnum">3</span>Pacientes por precedencia</span>
+      <div class="m-grid">
+        <label for="m3a">A · Urgente<input type="number" id="m3a" min="0" inputmode="numeric" placeholder="0"></label>
+        <label for="m3b">B · Urgente quirúrgico<input type="number" id="m3b" min="0" inputmode="numeric" placeholder="0"></label>
+        <label for="m3c">C · Prioritario<input type="number" id="m3c" min="0" inputmode="numeric" placeholder="0"></label>
+        <label for="m3d">D · Rutina<input type="number" id="m3d" min="0" inputmode="numeric" placeholder="0"></label>
+        <label for="m3e">E · Conveniencia<input type="number" id="m3e" min="0" inputmode="numeric" placeholder="0"></label>
+      </div></div>
+    <label for="m4"><span><span class="lnum">4</span>Equipo especial</span><select id="m4"><option value="A">A · Ninguno</option><option value="B">B · Grúa / torno</option><option value="C">C · Equipo de extracción</option><option value="D">D · Ventilador</option></select></label>
+    <div><span class="h2" style="display:block;margin-bottom:6px"><span class="lnum">5</span>Pacientes por tipo</span>
+      <div class="m-grid">
+        <label for="m5l">L · En camilla<input type="number" id="m5l" min="0" inputmode="numeric" placeholder="0"></label>
+        <label for="m5a">A · Ambulantes<input type="number" id="m5a" min="0" inputmode="numeric" placeholder="0"></label>
+      </div></div>
+    <label for="m6"><span><span class="lnum">6</span>Seguridad en la zona de recogida</span><select id="m6"><option value="N">N · Sin enemigo en la zona</option><option value="P">P · Posible enemigo</option><option value="E">E · Enemigo en la zona (precaución)</option><option value="X">X · Enemigo en la zona (escolta armada)</option></select></label>
+    <label for="m7"><span><span class="lnum">7</span>Señalización de la zona</span><select id="m7"><option value="A">A · Paneles</option><option value="B">B · Pirotecnia</option><option value="C">C · Humo</option><option value="D">D · Ninguna</option><option value="E">E · Otra</option></select></label>
+    <label for="m7t">Detalle de la señalización (color, tipo)<input type="text" id="m7t" placeholder="Humo verde"></label>
+    <label for="m8"><span><span class="lnum">8</span>Nacionalidad y estatus</span><select id="m8"><option value="A">A · Militar propio</option><option value="B">B · Civil propio</option><option value="C">C · Militar no propio</option><option value="D">D · Civil no propio</option><option value="E">E · Prisionero de guerra</option></select></label>
+    <label for="m9"><span><span class="lnum">9</span>Contaminación NBQ / descripción del terreno</span><input type="text" id="m9" placeholder="Sin contaminación · claro llano al norte del camino"></label>
+    <label for="m-obs">Observaciones<textarea id="m-obs" placeholder="Lesiones, estado, datos del contacto…"></textarea></label>
+    <div class="actions"><button class="btn primary" type="submit">Generar y copiar</button><button class="btn" type="button" id="m-clear">Vaciar</button></div>
+    <textarea id="m-out" class="docout" readonly hidden aria-label="Petición MEDEVAC"></textarea>
+    <div id="m-hist"></div>
   </form>
 </div>
 
@@ -1222,7 +1284,7 @@ const GEO=(()=>{
   return{parse,toMGRS,toUTM,fromUTM,zoneOf,dist,bearing};
 })();
 
-const VERSION='9 · 28/09/2026';
+const VERSION='10 · 29/09/2026';
 const KEY='malla-v2',DRAFT='malla-v2-draft',BK='malla-v2-backups',TAB='malla-v2-tab';
 const COLORS=['verde','amarillo','azul','rojo','morado','gris'];
 const DEF_ST=[{id:'M',n:'MOV',c:'amarillo',k:'movimiento, regreso a base, en marcha'},{id:'I',n:'INSTR',c:'azul',k:'instrucción, instruccion'},{id:'F',n:'LFX',c:'rojo',k:'ejercicio de fuego, lfx, fuego real'}];
@@ -1236,9 +1298,9 @@ try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){canS
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-const blank=()=>({app:'registro-malla',version:2,recs:[],st:JSON.parse(JSON.stringify(DEF_ST)),pts:[],zones:[],pc:null,cfg:{warn:30,crit:60},m5:1});
+const blank=()=>({app:'registro-malla',version:2,recs:[],st:JSON.parse(JSON.stringify(DEF_ST)),pts:[],zones:[],plan:[],docs:[],pc:null,cfg:{warn:30,crit:60},m5:1});
 let S=parse(lsGet(KEY),null)||blank();
-function fixup(){if(!Array.isArray(S.st))S.st=JSON.parse(JSON.stringify(DEF_ST));if(!Array.isArray(S.pts))S.pts=[];if(!Array.isArray(S.zones))S.zones=[];if(!S.cfg)S.cfg={warn:30,crit:60};if(!S.m5){S.recs.forEach(r=>{if(r.tipo==='E'){const g=guessTipo(r.acc);if(g)r.tipo=g}});S.m5=1}}
+function fixup(){if(!Array.isArray(S.st))S.st=JSON.parse(JSON.stringify(DEF_ST));if(!Array.isArray(S.pts))S.pts=[];if(!Array.isArray(S.zones))S.zones=[];if(!Array.isArray(S.plan))S.plan=[];if(!Array.isArray(S.docs))S.docs=[];if(!S.cfg)S.cfg={warn:30,crit:60};if(!S.m5){S.recs.forEach(r=>{if(r.tipo==='E'){const g=guessTipo(r.acc);if(g)r.tipo=g}});S.m5=1}}
 let backups=parse(lsGet(BK),[]);
 let editId=null;
 
@@ -1328,7 +1390,7 @@ function card(rs){
   const nc=out?{level:''}:contact(rs);
   return `<div class="item card${out?' out':''}${nc.level?' '+nc.level:''}" data-cs="${esc(last.cs)}" role="button" tabindex="0">
     ${badge(last)}
-    <div class="top"><span class="cs">${esc(last.cs)}</span><span class="t">${since}</span></div>
+    <div class="top"><span class="cs">${esc(last.cs)}</span><span class="t">${since}</span></div>${planDesc(last.cs)?`<div class="plan-desc">${esc(planDesc(last.cs))}</div>`:''}
     ${nums(last)?`<div class="nums">${nums(last)}</div>`:''}
     ${(()=>{const p=[...rs].reverse().find(r=>r.coord);return p?posHTML(p,p!==last?' (a las '+hm(p.t)+')':''):''})()}
     ${last.acc?`<div class="acc">${esc(last.acc)}</div>`:''}
@@ -1355,7 +1417,8 @@ function render(){
   $('#l-out').innerHTML=fo.length?fo.map(card).join(''):'<div class="empty">Nadie ha salido todavía.</div>';
 
   const uniq=a=>[...new Set(a.filter(Boolean))];
-  $('#l-cs').innerHTML=uniq(S.recs.map(r=>r.cs)).map(v=>`<option value="${esc(v)}">`).join('');
+  $('#l-cs').innerHTML=uniq([...S.plan.map(x=>x.cs),...S.recs.map(r=>r.cs)]).map(v=>`<option value="${esc(v)}">`).join('');
+  renderPlanChips(m);
   $('#l-zona').innerHTML=uniq(S.recs.map(r=>r.zona)).map(v=>`<option value="${esc(v)}">`).join('');
   const used=uniq([...S.recs].sort((a,b)=>a.t<b.t?1:-1).map(r=>r.acc)).filter(a=>a.length<=30&&!PRESETS.includes(a)&&!/^Radiocheck/.test(a)).slice(0,5);
   $('#acc-chips').innerHTML=[...PRESETS,...used].map(a=>`<button type="button" class="chip">${esc(a)}</button>`).join('');
@@ -1493,7 +1556,7 @@ document.querySelectorAll('[data-exp]').forEach(b=>b.addEventListener('click',()
   const lab=r=>LB[r.id]?LB[r.id].txt:stName(r.tipo,r);
   const ptRows=[];(S.pts||[]).forEach(p=>p.hist.forEach(h=>ptRows.push({p,h})));ptRows.sort((a,b)=>a.h.t<b.h.t?-1:1);
   if(b.dataset.exp==='csv'){$('#exp-out').value=csv([['Estado','Indicativo','DTG','Fecha y hora','Vehículos','Pax','Zona','Acción','MGRS','Latitud','Longitud'],...rs.map(r=>[lab(r),r.cs,dtg(r.t),new Date(r.t).toLocaleString('es-ES'),r.veh??'',r.pax??'',r.zona,r.acc,r.coord||'',r.lat!=null?r.lat.toFixed(6):'',r.lon!=null?r.lon.toFixed(6):'']),...ptRows.map(({p,h})=>[KINDS[p.kind]+(p.closed?' (retirado)':''),p.name,dtg(h.t),new Date(h.t).toLocaleString('es-ES'),'','','',h.note,h.coord||'',h.lat!=null?h.lat.toFixed(6):'',h.lon!=null?h.lon.toFixed(6):''])]);expName='malla-'+st+'.csv'}
-  else{$('#exp-out').value='REGISTRO DE MALLA — '+st+'\n\n'+rs.map(r=>dtg(r.t)+'  '+lab(r).padEnd(8)+'  '+r.cs+(r.veh!=null?' · '+r.veh+' veh':'')+(r.pax!=null?' · '+r.pax+' pax':'')+(r.zona?' · '+r.zona:'')+(r.coord?' · '+r.coord:'')+(r.acc?' — '+r.acc:'')).join('\n')+(ptRows.length?'\n\nDRONES, ENEMIGOS Y PUNTOS\n\n'+ptRows.map(({p,h})=>dtg(h.t)+'  '+KINDS[p.kind].padEnd(8)+'  '+p.name+(h.coord?' · '+h.coord:'')+(h.note?' — '+h.note:'')).join('\n'):'')+(pcPos()?'\n\nPUESTO DE MANDO: '+S.pc.coord:'');expName='malla-'+st+'.txt'}
+  else{$('#exp-out').value='REGISTRO DE MALLA — '+st+'\n\n'+rs.map(r=>dtg(r.t)+'  '+lab(r).padEnd(8)+'  '+r.cs+(r.veh!=null?' · '+r.veh+' veh':'')+(r.pax!=null?' · '+r.pax+' pax':'')+(r.zona?' · '+r.zona:'')+(r.coord?' · '+r.coord:'')+(r.acc?' — '+r.acc:'')).join('\n')+(ptRows.length?'\n\nDRONES, ENEMIGOS Y PUNTOS\n\n'+ptRows.map(({p,h})=>dtg(h.t)+'  '+KINDS[p.kind].padEnd(8)+'  '+p.name+(h.coord?' · '+h.coord:'')+(h.note?' — '+h.note:'')).join('\n'):'')+(pcPos()?'\n\nPUESTO DE MANDO: '+S.pc.coord:'')+(S.docs.length?'\n\nPARTES (SALUTE / MEDEVAC)\n\n'+S.docs.map(d=>d.text).join('\n\n'):'');expName='malla-'+st+'.txt'}
   $('#exp-box').hidden=false;
 }));
 async function copyFrom(ta){try{await navigator.clipboard.writeText(ta.value);toast('Copiado')}catch(e){ta.focus();ta.select();try{document.execCommand('copy');toast('Copiado')}catch(_){toast('Texto seleccionado: usa Copiar del menú')}}}
@@ -1509,7 +1572,7 @@ $('#exp-dl').addEventListener('click',()=>download(expName,$('#exp-out').value))
 
 /* copias */
 const valid=d=>d&&Array.isArray(d.recs);
-function restore(d){snapshot('pre');S=JSON.parse(JSON.stringify(d));fixup();renderStates();renderSegs();initPC();initCfg();view=null;fitReal=true;save('Copia restaurada')}
+function restore(d){snapshot('pre');S=JSON.parse(JSON.stringify(d));fixup();renderStates();renderSegs();initPC();initCfg();renderPlan();view=null;fitReal=true;save('Copia restaurada')}
 $('#bk-make').addEventListener('click',()=>{snapshot('manual');renderBackups();toast('Copia creada')});
 $('#l-bk').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const bk=backups.find(x=>x.id===b.closest('.item').dataset.id);if(!bk)return;
@@ -1521,7 +1584,7 @@ $('#bk-copy').addEventListener('click',()=>copyFrom(bkText()));
 $('#bk-dl').addEventListener('click',()=>{const ta=bkText();download(ta.dataset.name||'copia-malla.json',ta.value)});
 $('#bk-rest').addEventListener('click',e=>{const d=parse($('#bk-text').value.trim(),null);if(!valid(d)){toast('Eso no es una copia válida');return}confirmTap(e.currentTarget,'Confirmar',()=>{restore(d);$('#bk-text').value=''})});
 $('#bk-file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{if(!valid(parse(r.result,null))){toast('El archivo no es una copia válida');return}$('#bk-text').value=r.result;toast('Cargado. Pulsa Restaurar')};r.readAsText(f);e.target.value=''});
-$('#wipe').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar: borrar todo',()=>{snapshot('wipe');const st=S.st,pc=S.pc,cfg=S.cfg;S=blank();S.st=st;S.pc=pc;S.cfg=cfg;save('Todo borrado. Hay copia en la lista')}));
+$('#wipe').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar: borrar todo',()=>{snapshot('wipe');const st=S.st,pc=S.pc,cfg=S.cfg,plan=S.plan;S=blank();S.st=st;S.pc=pc;S.cfg=cfg;S.plan=plan;save('Todo borrado. Hay copia en la lista')}));
 
 /* puesto de mando */
 function initPC(){$('#pc-coord').value=S.pc?S.pc.coord:'';coordHint($('#pc-coord'),$('#pc-hint'),true)}
@@ -1533,7 +1596,7 @@ $('#pc-gps').addEventListener('click',()=>{if(!navigator.geolocation){toast('Est
 const KINDS={dron:'DRON',enemigo:'ENEMIGO',pdi:'PUNTO'};
 let ptId=null;
 function nextName(k){const names=new Set(S.pts.map(p=>p.name));let n=1;while(names.has(KINDS[k]+' '+n))n++;return KINDS[k]+' '+n}
-function paintPk(){$('#seg-p').querySelectorAll('label').forEach(l=>{const i=document.getElementById(l.htmlFor);l.className=i.checked?'kb k-'+i.value:''});$('#seg-air').hidden=document.querySelector('input[name=pk]:checked').value!=='dron';$('#seg-air').querySelectorAll('label').forEach(l=>{l.className=document.getElementById(l.htmlFor).checked?'kb k-dron':''})}
+function paintPk(){$('#seg-p').querySelectorAll('label').forEach(l=>{const i=document.getElementById(l.htmlFor);l.className=i.checked?'kb k-'+i.value:''});$('#seg-air').hidden=document.querySelector('input[name=pk]:checked').value!=='dron';$('#salute').hidden=document.querySelector('input[name=pk]:checked').value!=='enemigo';$('#seg-air').querySelectorAll('label').forEach(l=>{l.className=document.getElementById(l.htmlFor).checked?'kb k-dron':''})}
 function autoRaven(){if(/raven/i.test($('#p-name').value+' '+$('#p-note').value)){$('#air-plane').checked=true;paintPk()}}
 $('#seg-air').addEventListener('change',()=>{paintPk();$('#seg-air').dataset.touched='1'});
 ['#p-name','#p-note'].forEach(s=>$(s).addEventListener('input',()=>{if(!$('#seg-air').dataset.touched)autoRaven()}));
@@ -1546,6 +1609,7 @@ function openPoint(id){
   $('#p-t').value=toLocal(new Date());$('#p-coord').value=last?last.coord||'':'';$('#p-note').value=last?last.note||'':'';
   coordHint($('#p-coord'),$('#p-hint'));
   $('#p-hist').innerHTML=p&&p.hist.length?`<span class="h2">Historial</span><div class="tl-list" style="margin-top:6px">${[...p.hist].map(h=>`<div class="ev k-${p.kind}" style="--dot:var(--k);cursor:default"><div class="l1"><span class="hh">${hm(h.t)}</span><span class="nums">${dayLabel(h.t)==='Hoy'?'':dayLabel(h.t)}</span></div>${posHTML(h)}${h.note?`<div>${esc(h.note)}</div>`:''}</div>`).join('')}</div>`:'';
+  const sa=(last&&last.salute)||{};['s','a','u','e'].forEach(k=>$('#sa-'+k).value=sa[k]||'');$('#sa-out').hidden=true;
   $('#p-close').hidden=!p;
   $('#pt-sheet').hidden=false;
 }
@@ -1560,12 +1624,13 @@ $('#fp').addEventListener('submit',e=>{
   e.preventDefault();
   const kind=document.querySelector('input[name=pk]:checked').value,name=$('#p-name').value.trim().toUpperCase()||nextName(kind);
   const h={t:fromLocal($('#p-t').value)||new Date().toISOString(),note:$('#p-note').value.trim()};
+  if(kind==='enemigo'){const sa={};['s','a','u','e'].forEach(k=>{const v=$('#sa-'+k).value.trim();if(v)sa[k]=v});if(Object.keys(sa).length)h.salute=sa}
   const ok=applyCoord(h,$('#p-coord').value);
   let p=ptId?S.pts.find(x=>x.id===ptId):null;
   const air=kind==='dron'?document.querySelector('input[name=air]:checked').value:null;
   if(!p){p={id:uid(),kind,name,air,hist:[],closed:false};S.pts.push(p)}else{p.kind=kind;p.name=name;p.air=air}
   const last=p.hist[p.hist.length-1];
-  if(!last||last.coord!==h.coord||last.note!==h.note)p.hist.push(h);
+  if(!last||last.coord!==h.coord||last.note!==h.note||JSON.stringify(last.salute||{})!==JSON.stringify(h.salute||{}))p.hist.push(h);
   closePoint();fitReal=!LM;save(name+' guardado'+(ok?'':' (coordenadas sin reconocer)'));
 });
 $('#p-close').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar',()=>{const p=S.pts.find(x=>x.id===ptId);if(p){p.closed=true;p.closedT=new Date().toISOString()}closePoint();save('Quitado del mapa (sigue en la exportación)')}));
@@ -1804,6 +1869,7 @@ function relevoText(fromISO){
   if(S.zones.length){L2.push('','ZONAS:');const{units,pts}=mapItems();S.zones.forEach(z=>{const inside=[...units,...pts].filter(it=>inPoly(z,it.pos.lat,it.pos.lon)).map(it=>it.name);L2.push(`- ${z.name}: ${inside.length?'dentro '+inside.join(', '):'nadie dentro'}`)})}
   const ev=[...S.recs.filter(r=>new Date(r.t)>=from).map(r=>({t:r.t,s:`${lab(r).padEnd(8)} ${r.cs}${r.coord?' · '+r.coord:''}${r.acc?' — '+r.acc:''}`})),...S.pts.flatMap(p=>p.hist.filter(h=>new Date(h.t)>=from).map(h=>({t:h.t,s:`${(p.air==='plane'?'RAVEN':KINDS[p.kind]).padEnd(8)} ${p.name}${h.coord?' · '+h.coord:''}${h.note?' — '+h.note:''}`})))].sort((a,b)=>a.t<b.t?-1:1);
   L2.push('',`NOVEDADES (${ev.length}):`);ev.forEach(x=>L2.push(dtg(x.t)+'  '+x.s));
+  const docs=S.docs.filter(d=>new Date(d.t)>=from);if(docs.length){L2.push('','PARTES ENVIADOS:');docs.forEach(d=>L2.push('',d.text))}
   return L2.join('\n');
 }
 function openRelevo(){const f=lsGet('malla-relevo');const d=f?new Date(f):new Date(Date.now()-8*36e5);$('#relevo-from').value=toLocal(d);$('#relevo-out').value=relevoText(d.toISOString());$('#relevo-sheet').hidden=false}
@@ -1812,6 +1878,75 @@ $('#relevo-close').addEventListener('click',()=>{$('#relevo-sheet').hidden=true}
 $('#relevo-from').addEventListener('input',()=>{const v=fromLocal($('#relevo-from').value);if(v)$('#relevo-out').value=relevoText(v)});
 $('#relevo-copy').addEventListener('click',()=>copyFrom($('#relevo-out')));
 $('#relevo-mark').addEventListener('click',()=>{lsSet('malla-relevo',new Date().toISOString());toast('Relevo marcado a las '+hm(new Date().toISOString()))});
+
+/* plan de comunicaciones */
+const planDesc=cs=>{const x=S.plan.find(p=>p.cs===cs);return x?x.desc:''};
+function renderPlan(){
+  $('#plan-list').innerHTML=S.plan.map(x=>`<div class="planrow" data-pid="${x.id}">
+    <label>Indicativo<input type="text" class="upper" data-f="cs" value="${esc(x.cs)}" autocapitalize="characters"></label>
+    <label>Quién es<input type="text" data-f="desc" value="${esc(x.desc||'')}" placeholder="Jefe 1ª Sección"></label>
+    <button class="btn small danger" type="button" data-pdel>Quitar</button>
+    <div class="nums2"><label>Vehículos habituales<input type="number" data-f="veh" min="0" inputmode="numeric" value="${x.veh??''}"></label><label>Pax habituales<input type="number" data-f="pax" min="0" inputmode="numeric" value="${x.pax??''}"></label></div>
+  </div>`).join('')||'<p class="note">Todavía no hay indicativos en el plan.</p>';
+}
+let planT;
+$('#plan-list').addEventListener('input',e=>{const f=e.target.dataset.f;if(!f)return;const x=S.plan.find(p=>p.id===e.target.closest('.planrow').dataset.pid);if(!x)return;
+  x[f]=f==='cs'?e.target.value.trim().toUpperCase():(f==='veh'||f==='pax')?num(e.target.value):e.target.value.trim();
+  clearTimeout(planT);planT=setTimeout(()=>{persist();render()},400)});
+$('#plan-list').addEventListener('click',e=>{const b=e.target.closest('[data-pdel]');if(!b)return;const id=b.closest('.planrow').dataset.pid;confirmTap(b,'Confirmar',()=>{S.plan=S.plan.filter(p=>p.id!==id);renderPlan();save('Indicativo quitado del plan')})});
+$('#plan-add').addEventListener('click',()=>{S.plan.push({id:uid(),cs:'',desc:'',veh:null,pax:null});renderPlan();persist();const ins=$('#plan-list').querySelectorAll('input[data-f=cs]');ins[ins.length-1].focus()});
+function renderPlanChips(m){
+  const plan=S.plan.filter(x=>x.cs);$('#plan-box').hidden=!plan.length;
+  $('#plan-chips').innerHTML=plan.map(x=>{const rs=m[x.cs],last=rs&&rs[rs.length-1],inN=last&&last.tipo!=='S';const cls=inN?(LB[last.id]?LB[last.id].cls:stCls(last.tipo)):'fuera';return `<button type="button" class="chip plan-chip ${cls}" data-plan="${esc(x.cs)}" title="${esc(x.desc||'')}">${esc(x.cs)}</button>`}).join('');
+  const missing=plan.filter(x=>{const rs=m[x.cs];return !rs||rs[rs.length-1].tipo==='S'}).map(x=>x.cs);
+  $('#plan-missing').hidden=!missing.length;$('#plan-missing').textContent='Sin entrar en malla: '+missing.join(', ');
+}
+$('#plan-chips').addEventListener('click',e=>{const b=e.target.closest('[data-plan]');if(!b)return;const cs=b.dataset.plan,x=S.plan.find(p=>p.cs===cs);
+  resetForm();$('#cs').value=cs;if(!lastOf(cs)&&x){if(x.veh!=null)$('#veh').value=x.veh;if(x.pax!=null)$('#pax').value=x.pax}prefill();coordPH(cs);saveDraft();$('#acc').focus()});
+
+/* parte SALUTE */
+function saluteText(){
+  const t=fromLocal($('#p-t').value)||new Date().toISOString(),g=GEO.parse($('#p-coord').value||'');
+  const v=k=>$('#sa-'+k).value.trim()||'—';
+  return `PARTE SALUTE — ${$('#p-name').value.trim().toUpperCase()}\nS (Tamaño): ${v('s')}\nA (Actividad): ${v('a')}\nL (Localización): ${g?GEO.toMGRS(g.lat,g.lon):($('#p-coord').value.trim()||'—')}\nU (Unidad/uniforme): ${v('u')}\nT (Tiempo): ${dtg(t)}\nE (Equipo): ${v('e')}`+($('#p-note').value.trim()?`\nObservaciones: ${$('#p-note').value.trim()}`:'');
+}
+$('#sa-copy').addEventListener('click',()=>{const ta=$('#sa-out');ta.value=saluteText();ta.hidden=false;copyFrom(ta);S.docs.push({id:uid(),t:new Date().toISOString(),type:'SALUTE',text:ta.value});persist()});
+
+/* MEDEVAC 9 líneas */
+const M_IDS=['m1','m2','m3a','m3b','m3c','m3d','m3e','m4','m5l','m5a','m6','m7','m7t','m8','m9','m-obs'];
+function openMedevac(){
+  const{units,pts,pc}=mapItems();
+  $('#m1-from').innerHTML='<option value="">— elegir —</option>'+(pc?`<option value="${esc(pc.coord)}">Puesto de mando</option>`:'')+[...units,...pts].map(it=>`<option value="${esc(it.pos.coord)}">${esc(it.name)} · ${esc(it.pos.coord)}</option>`).join('');
+  const d=parse(lsGet('malla-medevac-draft'),null);if(d)M_IDS.forEach(k=>{if(d[k]!=null)$('#'+k).value=d[k]});
+  coordHint($('#m1'),$('#m1-hint'));renderMHist();$('#m-out').hidden=true;$('#medevac-sheet').hidden=false;
+}
+function mDraft(){const d={};M_IDS.forEach(k=>d[k]=$('#'+k).value);lsSet('malla-medevac-draft',JSON.stringify(d))}
+$('#fm').addEventListener('input',mDraft);$('#fm').addEventListener('change',mDraft);
+$('#m1').addEventListener('input',()=>coordHint($('#m1'),$('#m1-hint')));
+$('#m1-from').addEventListener('change',()=>{if($('#m1-from').value){$('#m1').value=$('#m1-from').value;coordHint($('#m1'),$('#m1-hint'));mDraft()}});
+$('#medevac-btn').addEventListener('click',openMedevac);
+$('#m-close').addEventListener('click',()=>{$('#medevac-sheet').hidden=true});
+$('#m-clear').addEventListener('click',e=>confirmTap(e.currentTarget,'Confirmar',()=>{M_IDS.forEach(k=>{const el=$('#'+k);el.tagName==='SELECT'?el.selectedIndex=0:el.value=''});mDraft();$('#m1-hint').textContent='';$('#m-out').hidden=true}));
+const selTxt=id=>{const el=$('#'+id);return el.options[el.selectedIndex].text.replace(' · ',' (')+')'};
+function medevacText(){
+  const g=GEO.parse($('#m1').value||''),n=id=>+$('#'+id).value||0;
+  const prec=[['A','urgente','m3a'],['B','urgente quirúrgico','m3b'],['C','prioritario','m3c'],['D','rutina','m3d'],['E','conveniencia','m3e']].filter(x=>n(x[2])).map(x=>`${x[0]}-${n(x[2])} (${x[1]})`).join(', ')||'—';
+  const tipo=[['L','camilla','m5l'],['A','ambulantes','m5a']].filter(x=>n(x[2])).map(x=>`${x[0]}-${n(x[2])} (${x[1]})`).join(', ')||'—';
+  return [`MEDEVAC 9 LÍNEAS — ${dtg(new Date().toISOString())}`,
+    `L1 Localización: ${g?GEO.toMGRS(g.lat,g.lon):($('#m1').value.trim()||'—')}`,
+    `L2 Frecuencia / indicativo: ${$('#m2').value.trim()||'—'}`,
+    `L3 Pacientes por precedencia: ${prec}`,
+    `L4 Equipo especial: ${selTxt('m4')}`,
+    `L5 Pacientes por tipo: ${tipo}`,
+    `L6 Seguridad en la zona: ${selTxt('m6')}`,
+    `L7 Señalización: ${selTxt('m7')}${$('#m7t').value.trim()?' — '+$('#m7t').value.trim():''}`,
+    `L8 Nacionalidad y estatus: ${selTxt('m8')}`,
+    `L9 NBQ / terreno: ${$('#m9').value.trim()||'—'}`]
+    .concat($('#m-obs').value.trim()?['Observaciones: '+$('#m-obs').value.trim()]:[]).join('\n');
+}
+$('#fm').addEventListener('submit',e=>{e.preventDefault();const ta=$('#m-out');ta.value=medevacText();ta.hidden=false;copyFrom(ta);S.docs.push({id:uid(),t:new Date().toISOString(),type:'MEDEVAC',text:ta.value});save('MEDEVAC copiada y guardada');renderMHist()});
+function renderMHist(){const d=S.docs.filter(x=>x.type==='MEDEVAC').slice(-5).reverse();$('#m-hist').innerHTML=d.length?`<span class="h2" style="display:block;margin:6px 0">Últimas peticiones</span><div class="list">${d.map(x=>`<div class="item"><span class="badge c-rojo">9L</span><div class="top"><span class="t">${dtg(x.t)}</span></div><div class="nums">${esc(x.text.split('\n')[1]||'')}</div><div class="side"><button class="btn small" type="button" data-mcopy="${x.id}">Copiar</button></div></div>`).join('')}</div>`:''}
+$('#m-hist').addEventListener('click',e=>{const b=e.target.closest('[data-mcopy]');if(!b)return;const x=S.docs.find(d=>d.id===b.dataset.mcopy);if(x){const ta=$('#m-out');ta.value=x.text;ta.hidden=false;copyFrom(ta)}});
 
 /* avisos y pantalla */
 function initCfg(){$('#cfg-warn').value=S.cfg.warn;$('#cfg-crit').value=S.cfg.crit}
@@ -1830,7 +1965,7 @@ function tick(){const n=new Date().toISOString();$('#clock').textContent=dtg(n)+
 setInterval(tick,15000);
 setInterval(()=>{if(document.activeElement===$('#q'))return;render()},60000);
 $('#ver').textContent='Versión '+VERSION;
-applyUI();initCfg();renderSegs();loadDraft();renderStates();initPC();persist();render();tick();coordHint($('#coord'),$('#coord-hint'));
+applyUI();initCfg();renderPlan();renderSegs();loadDraft();renderStates();initPC();persist();render();tick();coordHint($('#coord'),$('#coord-hint'));
 const t=lsGet(TAB);if(t==='cop'||t==='map')setTab(t);
 const flush=()=>{saveDraft();persist()};
 window.addEventListener('pagehide',flush);
